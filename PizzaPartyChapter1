@@ -266,7 +266,7 @@ Tabs.MainTab:AddButton({
 
 local HumanoidRootPart = GetHumanoidRootPart()
 OldCharacterPosition = HumanoidRootPart.CFrame
-
+        if workspace.GameTriggers.Items.ItemGroup:FindFirstChild('Handle') then
         HumanoidRootPart.CFrame = CFrame.fromMatrix(
         workspace.GameTriggers.Items.ItemGroup.Handle.Position + Vector3.new(0, 0, 0),
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
@@ -275,11 +275,11 @@ OldCharacterPosition = HumanoidRootPart.CFrame
         )
 
         wait(0.15)
-        if workspace.GameTriggers.Items.ItemGroup:FindFirstChild('Handle') then
+        
         fireclickdetector(workspace.GameTriggers.Items.ItemGroup.Handle.ClickDetector)
-        end
+       
         wait(0.1)
-
+         end
         
     for _,v in pairs(workspace.GameTriggers.Objectives.Panels:GetChildren()) do
        if v:IsA('MeshPart') and v:FindFirstChild('ClickDetector') then
