@@ -1,0 +1,170 @@
+local _, library = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/TrixAde/Osmium/main/OsmiumLibrary.lua")))
+
+local window = library:CreateWindow("Fnaf Doom Night 2")
+
+local MainTab = window:CreateTab("Main")
+
+MainTab:CreateSlider("Скорость игрока",16,50,function(arg)
+	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = arg
+end)
+
+MainTab:CreateToggle("Выключить раздражающие звуки",false,function(value)
+    
+   if value == true then
+
+    if workspace.Jogo.Puppet.Box.Part1:FindFirstChild('music') then
+    workspace.Jogo.Puppet.Box.Part1.music.Volume = 0
+    end
+    workspace.fnafmusic.musicfundo.Volume = 0
+    workspace.fnafmusic.musicfundo.Volume = 0
+    workspace.fnafmusic.chase.Script.Chase.Volume = 0
+    workspace.fnafmusic.chase.Script.Chase1.Volume = 0
+    workspace.fnafmusic.chase.Script.Chase2.Volume = 0
+    workspace.fnafmusic.chase.Script.Chase3.Volume = 0
+    workspace.fnafmusic.target.Script.Chase.Volume = 0.03
+    workspace.fnafmusic.target.Script.Chase1.Volume = 0.03
+    workspace.fnafmusic.target.Script.Chase2.Volume = 0.03
+    workspace.fnafmusic.target.Script.Chase3.Volume = 0.03
+    workspace.fnafmusic.target.Script.Chase4.Volume = 0.03
+    workspace.fnafmusic.target.Script.Chase5.Volume = 0.03
+    if workspace.Animatronics:FindFirstChild('puppet') then
+    workspace.Animatronics.puppet.Zombie.HumanoidRootPart.Sound.Volume = 0.03
+    end
+    workspace.fnafmusic.foxy.Volume = 0.03
+
+    else
+
+     if workspace.Jogo.Puppet.Box.Part1:FindFirstChild('music') then
+    workspace.Jogo.Puppet.Box.Part1.music.Volume = 1
+    end
+    workspace.fnafmusic.musicfundo.Volume = 1
+    workspace.fnafmusic.musicfundo.Volume = 1
+    workspace.fnafmusic.chase.Script.Chase.Volume = 1
+    workspace.fnafmusic.chase.Script.Chase1.Volume = 1
+    workspace.fnafmusic.chase.Script.Chase2.Volume = 1
+    workspace.fnafmusic.chase.Script.Chase3.Volume = 1
+    workspace.fnafmusic.target.Script.Chase.Volume = 1
+    workspace.fnafmusic.target.Script.Chase1.Volume = 1
+    workspace.fnafmusic.target.Script.Chase2.Volume = 1
+    workspace.fnafmusic.target.Script.Chase3.Volume = 1
+    workspace.fnafmusic.target.Script.Chase4.Volume = 1
+    workspace.fnafmusic.target.Script.Chase5.Volume = 1
+    if workspace.Animatronics:FindFirstChild('puppet') then
+    workspace.Animatronics.puppet.Zombie.HumanoidRootPart.Sound.Volume = 1
+    end
+    workspace.fnafmusic.foxy.Volume = 1
+
+   end
+
+end)
+
+local OldCharacterPosition = nil
+
+MainTab:CreateToggle("Авто-Хил-Шкатулки",false,function(value)
+    isAutoHealEnabled = value
+    
+
+   if isAutoHealEnabled == true then
+
+        if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 then
+
+
+            OldCharacterPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            
+    
+        end
+
+        while isAutoHealEnabled do
+
+            if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 then
+                    
+                
+               game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.fromMatrix(
+                    workspace.Jogo.Puppet.Botao.Button.Position + Vector3.new(0, -7, 0),
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+                )
+
+                if not workspace:FindFirstChild('SafePlatform') then
+                    local p = Instance.new('Part')
+                    p.Name = 'SafePlatform'
+                    p.Parent = workspace
+                    p.Anchored = true
+                    p.Size = Vector3.new(5, 5, 1)
+                    p.CFrame = workspace.Jogo.Puppet.Botao.Button.CFrame + Vector3.new(0, -10, 0)
+                end
+
+                fireproximityprompt(workspace.Jogo.Puppet.Botao.Button.ProximityPrompt)
+                
+
+
+            end
+
+            task.wait()
+        end
+
+
+    else
+
+        if OldCharacterPosition ~= nil then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = OldCharacterPosition
+            game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+
+            if workspace:FindFirstChild('SafePlatform') then
+                workspace:FindFirstChild('SafePlatform'):Destroy()
+           end
+
+        end
+
+
+   end
+
+end)
+
+MainTab:CreateButton("Тп за карту", function()
+    
+if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.131568908691406, 30.604434967041016, 20.399110794067383)
+    game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+
+end
+
+end)
+
+MainTab:CreateButton("Тп на спавн", function()
+    
+if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.14403533935547, 5.692269325256348, 21.049095153808594)
+    game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+
+end
+
+end)
+
+MainTab:CreateButton("Разблокировать вид от 3 лица", function()
+    
+    game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+    game.Players.LocalPlayer.CameraMaxZoomDistance = 32
+
+end)
+
+MainTab:CreateButton("Fullbright нахоээ", function()
+    
+   game:GetService("Lighting").Brightness = 50
+   game:GetService("Lighting").GlobalShadows = false
+
+end)
+
+MainTab:CreateButton("Не нажимай меня...", function()
+    
+    local remote = game:GetService("ReplicatedStorage").Jumpscares.Puppet.RemoteEvent
+    firesignal(remote.OnClientEvent)
+
+end)
