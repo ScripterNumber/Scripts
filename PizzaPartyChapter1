@@ -275,7 +275,7 @@ OldCharacterPosition = HumanoidRootPart.CFrame
         )
 
         wait(0.15)
-        if workspace.GameTriggers.Items:FindFirstChild('Handle') then
+        if workspace.GameTriggers.Items.ItemGroup:FindFirstChild('Handle') then
         fireclickdetector(workspace.GameTriggers.Items.ItemGroup.Handle.ClickDetector)
         end
         wait(0.1)
