@@ -1,16 +1,39 @@
-local _, library = pcall(loadstring(game:HttpGet("https://raw.githubusercontent.com/TrixAde/Osmium/main/OsmiumLibrary.lua")))
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
-local window = library:CreateWindow("Fnaf Doom Night 2")
+local window = Fluent:CreateWindow({
+    Title = "Fnaf Doom Night @",
+    SubTitle = "by N&C",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
 
-local MainTab = window:CreateTab("Main")
+local Tabs = {
+    MainTab = window:AddTab({ Title = "Main", Icon = "" }),
+}
 
-MainTab:CreateSlider("Скорость игрока",16,50,function(arg)
-	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = arg
-end)
+local Options = Fluent.Options
 
-MainTab:CreateToggle("Выключить раздражающие звуки",false,function(value)
-    
-   if value == true then
+local Slider = Tabs.MainTab:AddSlider("SpeedSliderOK", {
+        Title = "Скорость игрока",
+        Description = "",
+        Default = 16,
+        Min = 16,
+        Max = 50,
+        Rounding = 1,
+        Callback = function(value)
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+        end
+    })
+
+local NoSounds = Tabs.MainTab:AddToggle("NoSounds", {Title = "Убрать бесячие звуки", Default = false })
+
+NoSounds:OnChanged(function()
+if Options.NoSounds.Value == true then
 
     if workspace.Jogo.Puppet.Box.Part1:FindFirstChild('music') then
     workspace.Jogo.Puppet.Box.Part1.music.Volume = 0
@@ -58,10 +81,10 @@ MainTab:CreateToggle("Выключить раздражающие звуки",fa
 
 end)
 
-local OldCharacterPosition = nil
+local AutoShkat = Tabs.MainTab:AddToggle("AutoShkat", {Title = "Авто шкатулка", Default = false })
 
-MainTab:CreateToggle("Авто-Хил-Шкатулки",false,function(value)
-    isAutoHealEnabled = value
+AutoShkat:OnChanged(function()
+    isAutoHealEnabled = Options.AutoShkat.Value
     
 
    if isAutoHealEnabled == true then
@@ -121,50 +144,59 @@ MainTab:CreateToggle("Авто-Хил-Шкатулки",false,function(value)
 
 
    end
-
 end)
 
-MainTab:CreateButton("Тп за карту", function()
+Tabs.MainTab:AddButton({
+    Title = "Тп за карту",
+    Description = "",
+    Callback = function()
+     if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.131568908691406, 30.604434967041016, 20.399110794067383)
+     game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+     game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
     
-if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+    end
+  end
+})
 
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.131568908691406, 30.604434967041016, 20.399110794067383)
-    game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+Tabs.MainTab:AddButton({
+    Title = "Тп на спавн",
+    Description = "",
+    Callback = function()
+     if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
 
-end
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.14403533935547, 5.692269325256348, 21.049095153808594)
+     game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+     game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
 
-end)
+    end
+  end
+})
 
-MainTab:CreateButton("Тп на спавн", function()
-    
-if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+Tabs.MainTab:AddButton({
+    Title = "Разблокировать вид от 3 лица",
+    Description = "",
+    Callback = function()
+     game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+      game.Players.LocalPlayer.CameraMaxZoomDistance = 32
+  end
+})
 
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55.14403533935547, 5.692269325256348, 21.049095153808594)
-    game.Players.LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-    game.Players.LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+Tabs.MainTab:AddButton({
+    Title = "Fullbright нахоээ",
+    Description = "",
+    Callback = function()
+        game:GetService("Lighting").Brightness = 50
+        game:GetService("Lighting").GlobalShadows = false
+  end
+})
 
-end
-
-end)
-
-MainTab:CreateButton("Разблокировать вид от 3 лица", function()
-    
-    game.Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
-    game.Players.LocalPlayer.CameraMaxZoomDistance = 32
-
-end)
-
-MainTab:CreateButton("Fullbright нахоээ", function()
-    
-   game:GetService("Lighting").Brightness = 50
-   game:GetService("Lighting").GlobalShadows = false
-
-end)
-
-MainTab:CreateButton("Не нажимай меня...", function()
-    
-    local remote = game:GetService("ReplicatedStorage").Jumpscares.Puppet.RemoteEvent
-    firesignal(remote.OnClientEvent)
-
-end)
+Tabs.MainTab:AddButton({
+        Title = "Не нажимай меня...",
+        Description = "Не нажимай меня!",
+        Callback = function()
+            local remote = game:GetService("ReplicatedStorage").Jumpscares.Puppet.RemoteEvent
+              firesignal(remote.OnClientEvent)
+        end
+    })
