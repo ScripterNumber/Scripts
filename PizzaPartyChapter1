@@ -1,0 +1,310 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local window = Fluent:CreateWindow({
+    Title = "Pizza Party Chapter 1 @",
+    SubTitle = "by N&C",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    MainTab = window:AddTab({ Title = "Main", Icon = "" }),
+}
+
+local Options = Fluent.Options
+
+local function isExist()
+    local isexist = false
+    if game.Players.LocalPlayer.Character ~= nil
+    and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+    and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid')
+    and game.Players.LocalPlayer.Character.Humanoid.Health > 0 then
+        isexist = true
+    end
+
+    return isexist
+
+end
+
+local function GetHumanoidRootPart()
+    if isExist() then
+        return game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart')
+    end
+end
+
+Tabs.MainTab:AddButton({
+        Title = "Clean Up The Pizzeria",
+        Description = "",
+        Callback = function()
+    
+              if isExist() then
+    -- Clean up the pizzeria!
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Items.ItemGroup:GetChildren()) do
+       if v:IsA('MeshPart') then
+
+             HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+    
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Turn oF the Alarm",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+    -- Turn oF the Alarm
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Objectives.PowerSwitches:GetChildren()) do
+       if v:IsA('Model') then
+
+             HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Body.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireproximityprompt(v.Body.Attachment.ProximityPrompt)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Collect the wires",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+    -- Collect the wires!
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Items.ItemGroup:GetChildren()) do
+       if v:IsA('MeshPart') then
+
+             HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Restore Generator Power Task",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+    -- Restore generator power!
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Objectives.Generators:GetChildren()) do
+       if v:IsA('Model') then
+
+             HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Hitbox.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.Hitbox.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Collect the gixtboxes Task",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+    -- Collect the giftboxes!
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Items.GiftBoxes.ItemGroup:GetChildren()) do
+       if v:IsA('MeshPart') then
+
+             HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = workspace.GameTriggers.GiftboxesMiddle.GiftBox1.CFrame
+
+    wait(0.2)
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Collect the documentes",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+    -- Collect the documents
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+    for _,v in pairs(workspace.GameTriggers.Items.Documents.ItemGroup:GetChildren()) do
+       if v:IsA('MeshPart') then
+
+        HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+    HumanoidRootPart.CFrame = OldCharacterPosition
+
+end
+
+        end
+    })
+
+Tabs.MainTab:AddButton({
+        Title = "Last Restore Power Task",
+        Description = "",
+        Callback = function()
+
+              if isExist() then
+
+local HumanoidRootPart = GetHumanoidRootPart()
+OldCharacterPosition = HumanoidRootPart.CFrame
+
+        HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        workspace.GameTriggers.Items.ItemGroup.Handle.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(workspace.GameTriggers.Items.ItemGroup.Handle.ClickDetector)
+
+        wait(0.1)
+
+        
+    for _,v in pairs(workspace.GameTriggers.Objectives.Panels:GetChildren()) do
+       if v:IsA('MeshPart') and v:FindFirstChild('ClickDetector') then
+
+        HumanoidRootPart.CFrame = CFrame.fromMatrix(
+        v.Position + Vector3.new(0, 0, 0),
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.YVector,
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.ZVector
+        )
+
+        wait(0.15)
+
+        fireclickdetector(v.ClickDetector)
+
+        
+        wait(0.1)
+       end
+    end
+
+        
+        wait(0.1)
+
+        HumanoidRootPart.CFrame = OldCharacterPosition
+end
+
+        end
+    })
