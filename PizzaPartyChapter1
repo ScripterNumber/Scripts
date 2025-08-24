@@ -283,7 +283,7 @@ OldCharacterPosition = HumanoidRootPart.CFrame
         
     for _,v in pairs(workspace.GameTriggers.Objectives.Panels:GetChildren()) do
        if v:IsA('MeshPart') and v:FindFirstChild('ClickDetector') then
-
+        --xd
         HumanoidRootPart.CFrame = CFrame.fromMatrix(
         v.Position + Vector3.new(0, 0, 0),
         game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.XVector,
