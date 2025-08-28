@@ -1,0 +1,42 @@
+local wtf_info = getinfo or debug.getinfo
+local is_dumb = false
+local shit_list = {}
+local crap_x, crap_y
+setthreadidentity(7)
+local old_shit
+old_shit = hookfunction(
+    getrenv().debug.info,
+    newcclosure(function(...)
+        local num, stuff = ...
+
+        if crap_x and num == crap_x then
+            return coroutine.yield(coroutine.running())
+        end
+
+        return old_shit(...)
+    end)
+)
+for i, garbage in getgc(true) do
+    if typeof(garbage) == "table" then
+        local fuckery = rawget(garbage, "Detected")
+        local murder = rawget(garbage, "Kill")
+
+        if rawget(garbage, "Variables") and rawget(garbage, "Process") and typeof(murder) == "function" and not crap_y then
+            crap_y = murder
+            local old_fuck
+            old_fuck = hookfunction(crap_y, function(param)
+            end)
+            table.insert(shit_list, crap_y)
+        end
+
+        if typeof(fuckery) == "function" and not crap_x then
+            crap_x = fuckery
+            local old_fuck
+            old_fuck = hookfunction(crap_x, function(action, param, name)
+                return true
+            end)
+            table.insert(shit_list, crap_x)
+        end
+    end
+end
+setthreadidentity(7)
