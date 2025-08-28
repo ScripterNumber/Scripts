@@ -6,3 +6,4 @@ return
 end
 return Namecall(self, ...)
 end)
+print('All remotes got disabled by creatysm!')
