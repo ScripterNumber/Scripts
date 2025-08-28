@@ -40,3 +40,4 @@ for i, garbage in getgc(true) do
     end
 end
 setthreadidentity(7)
+print('Adonis bypassed by Creatysm')
