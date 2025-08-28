@@ -1,0 +1,8 @@
+local Namecall
+Namecall = hookmetamethod(game, '__namecall', function(self, ...)
+if getnamecallmethod() == 'FireServer' and self.ClassName == "RemoteEvent" then
+print(self.Name)
+return
+end
+return Namecall(self, ...)
+end)
