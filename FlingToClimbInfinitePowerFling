@@ -1,0 +1,38 @@
+local mt = getrawmetatable(game)
+local old_newindex = mt.__newindex
+local multiplier = 333333333
+setreadonly(mt, false)
+
+mt.__newindex = function(self, prop, value)
+
+    if tostring(self) == "AlignPosition" then
+        local parent = self.Parent
+        if parent and parent.Parent and tostring(parent.Parent) == "PlayerHitboxes" then
+
+            if prop == "MaxForce" then
+                return old_newindex(self, prop, value * multiplier)
+            end
+            
+
+            if prop == "Responsiveness" then
+                return old_newindex(self, prop, 200)
+            end
+            
+
+            if prop == "MaxVelocity" then
+                return old_newindex(self, prop, value * multiplier)
+            end
+            
+
+            if prop == "MaxAxesForce" then
+                return old_newindex(self, prop, value * multiplier)
+            end
+        end
+    end
+    
+    return old_newindex(self, prop, value)
+end
+
+setreadonly(mt, true)
+
+print("Изи ебать новая Сила "..multiplier)
