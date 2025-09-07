@@ -52,6 +52,33 @@ local function disableStun()
     end)
 end
 
+local function bypassAllChecks()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local hookModule = require(localPlayer.PlayerScripts.HookSystem["PlayerHookSystem.u"])
+    
+    if hookModule._vars then
+        hookModule._vars.hook.active = true
+        hookModule._vars.hook.possible = true
+        hookModule._vars.char.grabbedByPlr = false
+        hookModule._vars.char.JumpActive = true
+    end
+    
+    local oldClickedOnPart = hookModule.clickedOnPart
+    hookModule.clickedOnPart = function(part)
+        if not part then return false end
+        
+        hookModule:SetHook({
+            part = part,
+            rigid = part.Anchored or false
+        })
+        hookModule:SetFreeFallMode(true)
+        
+        return true
+    end
+    
+    return oldClickedOnPart
+end
+
 local PowerFlingChange = Tabs.MainTab:AddInput("PowerFlingChange", {
         Title = "Power of Fling",
         Default = 100,
@@ -131,6 +158,19 @@ Tabs.MainTab:AddButton({
      if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
 
         disableStun()
+
+    end
+  end
+})
+
+
+Tabs.MainTab:AddButton({
+    Title = "Hook-Any-Part",
+    Description = "",
+    Callback = function()
+     if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('HumanoidRootPart') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').Health > 0 and not isAutoHealEnabled then
+
+        bypassAllChecks()
 
     end
   end
