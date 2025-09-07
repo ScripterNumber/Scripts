@@ -1,0 +1,21 @@
+local UserInputService = game:GetService("UserInputService")
+local localPlayer = game.Players.LocalPlayer
+
+
+repeat wait() until localPlayer.Character
+
+
+for _, connection in pairs(getconnections(UserInputService.JumpRequest)) do
+    connection:Disable()
+end
+
+
+UserInputService.JumpRequest:Connect(function()
+    local character = localPlayer.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character.Humanoid
+        if humanoid.FloorMaterial ~= Enum.Material.Air and not humanoid.Sit then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
