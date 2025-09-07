@@ -14,9 +14,9 @@ local function hookToNearestGrab(radius)
     
     local hookModule = require(localPlayer.PlayerScripts.HookSystem["PlayerHookSystem.u"])
     
-    -- Проверяем, зацеплены ли мы сейчас
+
     if hookModule._vars and hookModule._vars.hook and hookModule._vars.hook.hooked then
-        -- Если зацеплены к тому же парту, что и в прошлый раз - отцепляемся
+
         if hookModule._vars.hook.onPart == lastHookedPart then
             hookModule:UnsetHook()
             if hookModule.InputDeactivation then
@@ -68,13 +68,13 @@ local function hookToNearestGrab(radius)
         local maxHookDist = hookModule.getMaxHookLength and hookModule.getMaxHookLength() or 100
         
         if nearestDist <= maxHookDist then
-            -- Если уже зацеплены за другой парт - сначала отцепляемся
+
             if hookModule._vars and hookModule._vars.hook and hookModule._vars.hook.hooked then
                 hookModule:UnsetHook()
                 task.wait(0.05)
             end
             
-            -- Обновляем позицию хука напрямую в модуле
+
             if hookModule._vars and hookModule._vars.hook then
                 hookModule._vars.hook.hookPos = nearestPoint
                 hookModule._vars.hook.calculatedHookedPos = nearestPoint
@@ -83,10 +83,10 @@ local function hookToNearestGrab(radius)
                 hookModule._vars.hook.active = true
             end
             
-            -- Обновляем визуализацию
+
             hookModule.update_hookPosition(nearestPoint)
             
-            -- Вызываем хук
+
             local success = pcall(function()
                 hookModule.clickedOnPart(nearest)
             end)
