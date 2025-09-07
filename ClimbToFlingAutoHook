@@ -1,0 +1,117 @@
+local lastHookedPart = nil
+
+local function hookToNearestGrab(radius)
+    radius = radius or 150
+    
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local CollectionService = game:GetService("CollectionService")
+    
+    local character = localPlayer.Character
+    if not character then return false end
+    
+    local hrp = character:FindFirstChild("Head")
+    if not hrp then return false end
+    
+    local hookModule = require(localPlayer.PlayerScripts.HookSystem["PlayerHookSystem.u"])
+    
+
+    if hookModule._vars and hookModule._vars.hook and hookModule._vars.hook.hooked then
+
+        if hookModule._vars.hook.onPart == lastHookedPart then
+            hookModule:UnsetHook()
+            if hookModule.InputDeactivation then
+                hookModule.InputDeactivation()
+            end
+            lastHookedPart = nil
+            return false
+        end
+    end
+    
+    local playerPos = hrp.Position
+    
+    local region = Region3.new(
+        playerPos - Vector3.new(radius, radius, radius),
+        playerPos + Vector3.new(radius, radius, radius)
+    )
+    region = region:ExpandToGrid(4)
+    
+    local parts = workspace:FindPartsInRegion3(region, character, 1000)
+    
+    local nearest = nil
+    local nearestDist = math.huge
+    local nearestPoint = nil
+    
+    for _, part in ipairs(parts) do
+        if part:IsA("BasePart") and CollectionService:HasTag(part, "grab") then
+            local cf = part.CFrame
+            local size = part.Size / 2
+            local localPos = cf:PointToObjectSpace(playerPos)
+            
+            local closestLocal = Vector3.new(
+                math.clamp(localPos.X, -size.X, size.X),
+                math.clamp(localPos.Y, -size.Y, size.Y),
+                math.clamp(localPos.Z, -size.Z, size.Z)
+            )
+            
+            local closestWorld = cf:PointToWorldSpace(closestLocal)
+            local distance = (closestWorld - playerPos).Magnitude
+            
+            if distance < nearestDist then
+                nearestDist = distance
+                nearest = part
+                nearestPoint = closestWorld
+            end
+        end
+    end
+    
+    if nearest then
+        local maxHookDist = hookModule.getMaxHookLength and hookModule.getMaxHookLength() or 100
+        
+        if nearestDist <= maxHookDist then
+
+            if hookModule._vars and hookModule._vars.hook and hookModule._vars.hook.hooked then
+                hookModule:UnsetHook()
+                task.wait(0.05)
+            end
+            
+
+            if hookModule._vars and hookModule._vars.hook then
+                hookModule._vars.hook.hookPos = nearestPoint
+                hookModule._vars.hook.calculatedHookedPos = nearestPoint
+                hookModule._vars.hook.calculatedHookedDist = nearestDist
+                hookModule._vars.hook.possible = true
+                hookModule._vars.hook.active = true
+            end
+            
+
+            hookModule.update_hookPosition(nearestPoint)
+            
+ 
+            local success = pcall(function()
+                hookModule.clickedOnPart(nearest)
+            end)
+            
+            if not success then
+                hookModule:SetHook({
+                    part = nearest,
+                    rigid = nearest.Anchored
+                })
+                hookModule:SetFreeFallMode(true)
+            end
+            
+            lastHookedPart = nearest
+            return true
+        end
+    end
+    
+    return false
+end
+
+_G.NewFunc = hookToNearestGrab
+
+local uis = game.UserInputService
+uis.InputBegan:Connect(function(i, gpe)
+    if i.UserInputType == Enum.UserInputType.MouseButton2 and not gpe then
+        _G.NewFunc()
+    end
+end)
