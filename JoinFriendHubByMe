@@ -1,0 +1,341 @@
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SimpleServerHub"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0.25, 0, 0.35, 0)
+mainFrame.Position = UDim2.new(0.375, 0, 0.325, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0.03, 0)
+mainCorner.Parent = mainFrame
+
+local mainGradient = Instance.new("UIGradient")
+mainGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
+}
+mainGradient.Rotation = 90
+mainGradient.Parent = mainFrame
+
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0.15, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "SERVER HUB"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0.1, 0, 0.1, 0)
+closeBtn.Position = UDim2.new(0.88, 0, 0.025, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeBtn.Text = "×"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextScaled = true
+closeBtn.Font = Enum.Font.Gotham
+closeBtn.Parent = mainFrame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0.2, 0)
+closeCorner.Parent = closeBtn
+
+
+local content = Instance.new("Frame")
+content.Size = UDim2.new(0.9, 0, 0.75, 0)
+content.Position = UDim2.new(0.05, 0, 0.2, 0)
+content.BackgroundTransparency = 1
+content.Parent = mainFrame
+
+
+local currentFrame = Instance.new("Frame")
+currentFrame.Size = UDim2.new(1, 0, 0.45, 0)
+currentFrame.Position = UDim2.new(0, 0, 0, 0)
+currentFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+currentFrame.Parent = content
+
+local currentCorner = Instance.new("UICorner")
+currentCorner.CornerRadius = UDim.new(0.05, 0)
+currentCorner.Parent = currentFrame
+
+local currentLabel = Instance.new("TextLabel")
+currentLabel.Size = UDim2.new(1, 0, 0.25, 0)
+currentLabel.BackgroundTransparency = 1
+currentLabel.Text = "📍 CURRENT SERVER"
+currentLabel.TextColor3 = Color3.fromRGB(150, 150, 255)
+currentLabel.TextScaled = true
+currentLabel.Font = Enum.Font.Gotham
+currentLabel.Parent = currentFrame
+
+local infoBox = Instance.new("TextBox")
+infoBox.Size = UDim2.new(0.9, 0, 0.45, 0)
+infoBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+infoBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+infoBox.Text = ""
+infoBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoBox.TextScaled = true
+infoBox.Font = Enum.Font.Code
+infoBox.TextEditable = false
+infoBox.ClearTextOnFocus = false
+infoBox.TextXAlignment = Enum.TextXAlignment.Left
+infoBox.Parent = currentFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0.08, 0)
+infoCorner.Parent = infoBox
+
+local copyBtn = Instance.new("TextButton")
+copyBtn.Size = UDim2.new(0.9, 0, 0.2, 0)
+copyBtn.Position = UDim2.new(0.05, 0, 0.75, 0)
+copyBtn.BackgroundColor3 = Color3.fromRGB(100, 150, 255)
+copyBtn.Text = "📋 COPY DATA"
+copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyBtn.TextScaled = true
+copyBtn.Font = Enum.Font.GothamBold
+copyBtn.Parent = currentFrame
+
+local copyCorner = Instance.new("UICorner")
+copyCorner.CornerRadius = UDim.new(0.1, 0)
+copyCorner.Parent = copyBtn
+
+
+local joinFrame = Instance.new("Frame")
+joinFrame.Size = UDim2.new(1, 0, 0.45, 0)
+joinFrame.Position = UDim2.new(0, 0, 0.55, 0)
+joinFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+joinFrame.Parent = content
+
+local joinFrameCorner = Instance.new("UICorner")
+joinFrameCorner.CornerRadius = UDim.new(0.05, 0)
+joinFrameCorner.Parent = joinFrame
+
+local joinLabel = Instance.new("TextLabel")
+joinLabel.Size = UDim2.new(1, 0, 0.25, 0)
+joinLabel.BackgroundTransparency = 1
+joinLabel.Text = "🚀 JOIN SERVER"
+joinLabel.TextColor3 = Color3.fromRGB(150, 255, 150)
+joinLabel.TextScaled = true
+joinLabel.Font = Enum.Font.Gotham
+joinLabel.Parent = joinFrame
+
+
+local jobIdInput = Instance.new("TextBox")
+jobIdInput.Size = UDim2.new(0.9, 0, 0.2, 0)
+jobIdInput.Position = UDim2.new(0.05, 0, 0.25, 0)
+jobIdInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+jobIdInput.PlaceholderText = "JobId = ..."
+jobIdInput.Text = ""
+jobIdInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+jobIdInput.TextScaled = true
+jobIdInput.Font = Enum.Font.Code
+jobIdInput.Parent = joinFrame
+
+local jobIdCorner = Instance.new("UICorner")
+jobIdCorner.CornerRadius = UDim.new(0.1, 0)
+jobIdCorner.Parent = jobIdInput
+
+
+local placeIdInput = Instance.new("TextBox")
+placeIdInput.Size = UDim2.new(0.9, 0, 0.2, 0)
+placeIdInput.Position = UDim2.new(0.05, 0, 0.5, 0)
+placeIdInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+placeIdInput.PlaceholderText = "PlaceId = ..."
+placeIdInput.Text = ""
+placeIdInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+placeIdInput.TextScaled = true
+placeIdInput.Font = Enum.Font.Code
+placeIdInput.Parent = joinFrame
+
+local placeIdCorner = Instance.new("UICorner")
+placeIdCorner.CornerRadius = UDim.new(0.1, 0)
+placeIdCorner.Parent = placeIdInput
+
+
+local joinBtn = Instance.new("TextButton")
+joinBtn.Size = UDim2.new(0.9, 0, 0.2, 0)
+joinBtn.Position = UDim2.new(0.05, 0, 0.75, 0)
+joinBtn.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+joinBtn.Text = "🎮 JOIN"
+joinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+joinBtn.TextScaled = true
+joinBtn.Font = Enum.Font.GothamBold
+joinBtn.Parent = joinFrame
+
+local joinBtnCorner = Instance.new("UICorner")
+joinBtnCorner.CornerRadius = UDim.new(0.1, 0)
+joinBtnCorner.Parent = joinBtn
+
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0.035, 0, 0.062, 0)
+toggleBtn.Position = UDim2.new(0.01, 0, 0.47, 0)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
+toggleBtn.Text = "🌐"
+toggleBtn.TextScaled = true
+toggleBtn.Parent = screenGui
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0.5, 0)
+toggleCorner.Parent = toggleBtn
+
+
+local function updateServerInfo()
+    local jobId = game.JobId
+    local placeId = game.PlaceId
+    
+    infoBox.Text = string.format(
+        " JobId = %s\n PlaceId = %s",
+        jobId ~= "" and jobId or "Studio/Local",
+        tostring(placeId)
+    )
+end
+
+local function animateButton(button)
+    local originalSize = button.Size
+    button:TweenSize(
+        UDim2.new(originalSize.X.Scale * 0.95, 0, originalSize.Y.Scale * 0.95, 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quad,
+        0.1,
+        true,
+        function()
+            button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1)
+        end
+    )
+end
+
+local function showNotification(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration or 3
+    })
+end
+
+local function parseServerData(text)
+    local jobId = text:match("JobId%s*=%s*([%w%-]+)")
+    local placeId = text:match("PlaceId%s*=%s*(%d+)")
+    
+    return jobId, tonumber(placeId)
+end
+
+
+copyBtn.MouseButton1Click:Connect(function()
+    animateButton(copyBtn)
+    
+    local jobId = game.JobId
+    local placeId = game.PlaceId
+    
+    local data = string.format(
+        "%s\n%s",
+        jobId ~= "" and jobId or "Studio/Local",
+        tostring(placeId)
+    )
+    
+    setclipboard(data)
+    showNotification("✅ Copied!", "Server data copied to clipboard", 3)
+end)
+
+joinBtn.MouseButton1Click:Connect(function()
+    animateButton(joinBtn)
+    
+
+    local jobIdText = jobIdInput.Text
+    local placeIdText = placeIdInput.Text
+    
+    local jobId = jobIdText:match("([%w%-]+)") or jobIdText
+    local placeId = tonumber(placeIdText:match("(%d+)") or placeIdText)
+    
+    if jobId == "" or not placeId then
+        showNotification("❌ Error", "Invalid JobId or PlaceId", 3)
+        return
+    end
+    
+
+    local success, err = pcall(function()
+        TeleportService:TeleportToPlaceInstance(placeId, jobId, player)
+    end)
+    
+    if success then
+        showNotification("🚀 Teleporting...", "Joining server...", 5)
+    else
+        showNotification("❌ Error", "Failed to join: " .. tostring(err), 5)
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    animateButton(closeBtn)
+    mainFrame:TweenSize(
+        UDim2.new(0, 0, 0, 0),
+        Enum.EasingDirection.In,
+        Enum.EasingStyle.Back,
+        0.3,
+        true,
+        function()
+            mainFrame.Visible = false
+            mainFrame.Size = UDim2.new(0.25, 0, 0.35, 0)
+        end
+    )
+end)
+
+toggleBtn.MouseButton1Click:Connect(function()
+    animateButton(toggleBtn)
+    
+    if not mainFrame.Visible then
+        mainFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 0, 0, 0)
+        mainFrame:TweenSize(
+            UDim2.new(0.25, 0, 0.35, 0),
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Back,
+            0.3
+        )
+        updateServerInfo()
+    else
+        closeBtn.MouseButton1Click:Fire()
+    end
+end)
+
+
+jobIdInput.Focused:Connect(function()
+    local clipboard = getclipboard and getclipboard() or ""
+    local jobId, placeId = parseServerData(clipboard)
+    
+    if jobId and placeId then
+        jobIdInput.Text = "JobId = " .. jobId
+        placeIdInput.Text = "PlaceId = " .. tostring(placeId)
+    end
+end)
+
+
+updateServerInfo()
+mainFrame.Visible = false
+
+showNotification("Server Hub", "Press 🌐 to open", 5)
+
+
+spawn(function()
+    while wait(5) do
+        if mainFrame.Visible then
+            updateServerInfo()
+        end
+    end
+end)
