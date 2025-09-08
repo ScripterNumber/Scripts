@@ -1,8 +1,12 @@
 local function bypassNPCTouch()
     local player = game.Players.LocalPlayer
     local character = player.Character
-    
+    local pos = character.HumanoidRootPart.CFrame
     character.HumanoidRootPart.CFrame = CFrame.new(-50.79290008544922, 25.13868522644043, -87.45770263671875)
+    character.HumanoidRootPart.CFrame = CFrame.new(-50.79290008544922, 25.13868522644043, -87.45770263671875)
+
+    wait(0.05)
+
     local fakeRoot = character.HumanoidRootPart:Clone()
     fakeRoot.Name = "HumanoidRootPart"
     fakeRoot.Transparency = 1
@@ -29,6 +33,10 @@ local function bypassNPCTouch()
     originalRoot.CanTouch = false
     originalRoot.CanQuery = false
     fakeRoot.Name = 'HumanoidRootPart'
+    
+    
+    character.HumanoidRootPart.CFrame = pos
+
 end
 
 bypassNPCTouch()
