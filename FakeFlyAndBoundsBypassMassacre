@@ -20,7 +20,7 @@ local function bypassNPCTouch()
     originalRoot.Name = "OriginalRoot"
     
 
-    character.HumanoidRootPart = fakeRoot
+    originalRoot = fakeRoot
 
     fakeRoot.Name = 'HumanoidRootPart'
 
@@ -40,3 +40,4 @@ local function bypassNPCTouch()
 end
 
 bypassNPCTouch()
+print('Bypassed whole game!')
