@@ -1,0 +1,34 @@
+local function bypassNPCTouch()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    
+    character.HumanoidRootPart.CFrame = CFrame.new(-50.79290008544922, 25.13868522644043, -87.45770263671875)
+    local fakeRoot = character.HumanoidRootPart:Clone()
+    fakeRoot.Name = "HumanoidRootPart"
+    fakeRoot.Transparency = 1
+    fakeRoot.CanCollide = false
+    fakeRoot.CanTouch = false
+    fakeRoot.CanQuery = false
+    fakeRoot.Parent = character
+    
+    
+    local originalRoot = character.HumanoidRootPart
+    originalRoot.Name = "OriginalRoot"
+    
+
+    character.HumanoidRootPart = fakeRoot
+
+    fakeRoot.Name = 'HumanoidRootPart'
+
+    local weld = Instance.new("WeldConstraint")
+    weld.Part0 = fakeRoot
+    weld.Part1 = originalRoot
+    weld.Parent = character
+    
+    fakeRoot.Name = 'HumanoidRootPart'
+    originalRoot.CanTouch = false
+    originalRoot.CanQuery = false
+    fakeRoot.Name = 'HumanoidRootPart'
+end
+
+bypassNPCTouch()
