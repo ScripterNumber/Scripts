@@ -1,0 +1,310 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+local Head = Character:WaitForChild("Head")
+local Torso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+
+local SpinSpeed = 9999
+local HeadAngleMin = -75
+local HeadAngleMax = 45
+local HeadSpeed = 30
+local MaxSpeed = 100
+local FOV = 325
+local JumpPower = 50
+local WallCheckEnabled = true
+
+local Spinning = true
+local AutoJump = false
+local SpeedBoost = false
+local CurrentSpeed = 16
+local HeadTime = 0
+local OriginalNeckC0 = nil
+local Neck = nil
+local CurrentAngle = 0
+
+
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Visible = true
+FOVCircle.Thickness = 2
+FOVCircle.Color = Color3.fromRGB(255, 0, 255)
+FOVCircle.Filled = false
+FOVCircle.Transparency = 0.7
+FOVCircle.Radius = FOV
+
+
+local FOVCircleInner = Drawing.new("Circle")
+FOVCircleInner.Visible = true
+FOVCircleInner.Thickness = 1
+FOVCircleInner.Color = Color3.fromRGB(255, 255, 255)
+FOVCircleInner.Filled = false
+FOVCircleInner.Transparency = 0.3
+FOVCircleInner.Radius = FOV - 10
+
+
+local function FindNeck()
+
+    if Torso and Torso:FindFirstChild("Neck") then
+        Neck = Torso.Neck
+        OriginalNeckC0 = Neck.C0
+        return
+    end
+    
+
+    if Head:FindFirstChild("Neck") then
+        Neck = Head.Neck
+        OriginalNeckC0 = Neck.C0
+        return
+    end
+    
+
+    for _, v in pairs(Character:GetDescendants()) do
+        if v:IsA("Motor6D") and v.Name == "Neck" then
+            Neck = v
+            OriginalNeckC0 = v.C0
+            return
+        end
+    end
+end
+
+FindNeck()
+
+
+local function IsPlayerVisible(Player)
+    if not WallCheckEnabled then
+        return true
+    end
+    
+    if not Player.Character or not Player.Character:FindFirstChild("Head") then
+        return false
+    end
+    
+    local Origin = Camera.CFrame.Position
+    local Target = Player.Character.Head.Position
+    local Direction = (Target - Origin).Unit * (Target - Origin).Magnitude
+    
+
+    local RaycastParams = RaycastParams.new()
+    RaycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+    RaycastParams.FilterDescendantsInstances = {Character, Camera}
+    RaycastParams.IgnoreWater = true
+    
+
+    local Result = workspace:Raycast(Origin, Direction, RaycastParams)
+    
+    if Result then
+        local HitPart = Result.Instance
+        if HitPart:IsDescendantOf(Player.Character) then
+            return true
+        else
+            return false
+        end
+    end
+    
+    return true
+end
+
+
+local function GetClosestPlayer()
+    local ClosestPlayer = nil
+    local ShortestDistance = FOV
+    local MousePos = UserInputService:GetMouseLocation()
+    
+    for _, Player in pairs(Players:GetPlayers()) do
+        if Player ~= LocalPlayer and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+            local Pos, OnScreen = Camera:WorldToViewportPoint(Player.Character.HumanoidRootPart.Position)
+            local Distance = (Vector2.new(Pos.X, Pos.Y) - MousePos).Magnitude
+            
+            if OnScreen and Distance < ShortestDistance and IsPlayerVisible(Player) then
+                ClosestPlayer = Player
+                ShortestDistance = Distance
+            end
+        end
+    end
+    
+    return ClosestPlayer
+end
+
+
+local SpinConnection
+SpinConnection = RunService.Heartbeat:Connect(function(deltaTime)
+
+    local MousePos = UserInputService:GetMouseLocation()
+    FOVCircle.Position = MousePos
+    FOVCircleInner.Position = MousePos
+    
+
+    local PulseSize = math.sin(tick() * 2) * 5
+    FOVCircle.Radius = FOV + PulseSize
+    FOVCircleInner.Radius = (FOV - 10) + PulseSize
+    
+    if Spinning and Character and RootPart then
+
+        local savedVelocity = RootPart.AssemblyLinearVelocity
+        local savedPosition = RootPart.Position
+        
+
+        Humanoid.AutoRotate = false
+        
+
+        CurrentAngle = CurrentAngle + (SpinSpeed * deltaTime)
+        if CurrentAngle > 360 then
+            CurrentAngle = CurrentAngle - 360
+        end
+
+        local wasAnchored = RootPart.Anchored
+        RootPart.Anchored = true
+        RootPart.CFrame = RootPart.CFrame * CFrame.Angles(0, math.rad(50), 0)
+        RootPart.Anchored = wasAnchored
+        
+        if RootPart:FindFirstChild("RootJoint") then
+            local RJ = RootPart.RootJoint
+            local OrigC0 = RJ.C0
+            RJ.C0 = OrigC0 * CFrame.Angles(0, 0, math.rad(CurrentAngle))
+        end
+        
+
+        
+
+        RootPart.Position = savedPosition
+        RootPart.AssemblyLinearVelocity = savedVelocity
+        
+
+        Humanoid.AutoRotate = true
+        
+
+        if Neck and OriginalNeckC0 then
+            HeadTime = HeadTime + (HeadSpeed * deltaTime)
+            
+
+            local headAngle = HeadAngleMin + (HeadAngleMax - HeadAngleMin) * ((math.sin(HeadTime) + 1) / 2)
+            
+
+            local randomTwitch = math.random(-5, 5)
+            local randomSide = math.random(-10, 10)
+
+            Neck.C0 = OriginalNeckC0 * CFrame.Angles(
+                math.rad(headAngle + randomTwitch),
+                math.rad(randomSide),
+                0
+            )
+        else
+
+            FindNeck()
+        end
+        
+
+        local Target = GetClosestPlayer()
+        if Target and Target.Character and Target.Character:FindFirstChild("Head") then
+
+            FOVCircle.Color = Color3.fromRGB(0, 255, 0)
+            FOVCircleInner.Color = Color3.fromRGB(0, 255, 100)
+            
+
+            local TargetPos = Target.Character.Head.Position
+            local CameraPos = Camera.CFrame.Position
+            local NewCFrame = CFrame.lookAt(CameraPos, TargetPos)
+            Camera.CFrame = Camera.CFrame:Lerp(NewCFrame, 1)
+        else
+
+            FOVCircle.Color = Color3.fromRGB(255, 0, 255)
+            FOVCircleInner.Color = Color3.fromRGB(255, 255, 255)
+        end
+    end
+end)
+
+local JumpConnection
+JumpConnection = RunService.Heartbeat:Connect(function()
+    if AutoJump and Humanoid then
+        if Humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+            Humanoid.Jump = true
+        end
+
+        if Humanoid:GetState() == Enum.HumanoidStateType.Freefall and SpeedBoost then
+            local Velocity = RootPart.AssemblyLinearVelocity
+            local MoveDirection = Humanoid.MoveDirection
+            
+            if CurrentSpeed < MaxSpeed then
+                CurrentSpeed = CurrentSpeed + 0.5
+            end
+            
+            if MoveDirection.Magnitude > 0 then
+                RootPart.AssemblyLinearVelocity = Vector3.new(
+                    MoveDirection.X * CurrentSpeed,
+                    Velocity.Y,
+                    MoveDirection.Z * CurrentSpeed
+                )
+            end
+        else
+
+            if CurrentSpeed > 16 then
+                CurrentSpeed = CurrentSpeed - 1
+            end
+        end
+    end
+end)
+
+UserInputService.InputBegan:Connect(function(Input, GameProcessed)
+    if GameProcessed then return end
+    
+    if Input.KeyCode == Enum.KeyCode.Space then
+        AutoJump = true
+        SpeedBoost = true
+    elseif Input.KeyCode == Enum.KeyCode.X then
+        Spinning = not Spinning
+        FOVCircle.Visible = Spinning
+        FOVCircleInner.Visible = Spinning
+        if not Spinning and Neck and OriginalNeckC0 then
+            Neck.C0 = OriginalNeckC0
+        end
+    elseif Input.KeyCode == Enum.KeyCode.V then
+        WallCheckEnabled = not WallCheckEnabled
+    elseif Input.KeyCode == Enum.KeyCode.B then
+        if FOV == 200 then
+            FOV = 300
+        elseif FOV == 300 then
+            FOV = 100
+        else
+            FOV = 200
+        end
+        FOVCircle.Radius = FOV
+        FOVCircleInner.Radius = FOV - 10
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(Input, GameProcessed)
+    if GameProcessed then return end
+    
+    if Input.KeyCode == Enum.KeyCode.Space then
+        AutoJump = false
+        SpeedBoost = false
+        CurrentSpeed = 16
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(NewCharacter)
+    Character = NewCharacter
+    Humanoid = Character:WaitForChild("Humanoid")
+    RootPart = Character:WaitForChild("HumanoidRootPart")
+    Head = Character:WaitForChild("Head")
+    Torso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+    
+    CurrentSpeed = 16
+    HeadTime = 0
+    OriginalNeckC0 = nil
+    Neck = nil
+    CurrentAngle = 0
+    
+    wait(0.1)
+    FindNeck()
+end)
+
+game:GetService("Players").LocalPlayer.CharacterRemoving:Connect(function()
+    FOVCircle:Remove()
+    FOVCircleInner:Remove()
+end)
