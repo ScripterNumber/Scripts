@@ -2,6 +2,9 @@ local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOog
 local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
  
+local LocalPlayer = game.Players.LocalPlayer
+local PlayerName = LocalPlayer.Name
+
 local Window = Library:CreateWindow{
     Title = `Die of Death`,
     SubTitle = "| by Creatysm",
@@ -19,6 +22,10 @@ local Tabs = {
         Title = "Main",
         Icon = "phosphor-users-bold"
     },
+	VisualsTab = Window:CreateTab{
+        Title = "Visuals",
+        Icon = "phosphor-users-bold"
+    },
 	AbilitiesTab = Window:CreateTab{
         Title = "Abilities",
         Icon = "phosphor-users-bold"
@@ -27,10 +34,21 @@ local Tabs = {
 
 local Options = Library.Options
 
+local function IsFriend(playerName)
+    local player = game.Players:FindFifrstChild(playerName)
+    if player then
+        return LocalPlayer:IsFriendsWith(player.UserId)
+    end
+    return false
+end
 
 local function ESP(Target, colorRGB, roleText)
     colorRGB = colorRGB or Color3.fromRGB(255, 0, 0)
     roleText = roleText or "Killer"
+    
+    if IsFriend(Target.Name) then
+        colorRGB = Color3.fromRGB(255, 255, 0)
+    end
 
     local a = Instance.new("BoxHandleAdornment")
     a.Name = Target.Name.."_PESP"
@@ -93,7 +111,12 @@ local function UpdateESPText(Target, roleText)
         if billboard and billboard:IsA("BillboardGui") then
             local textLabel = billboard:FindFirstChild("TextLabel")
             if textLabel and Target:FindFirstChild("Humanoid") then
-                textLabel.Text = roleText..": "..Target.Name.." | HP: "..math.floor(Target.Humanoid.Health)
+                local friendText = IsFriend(Target.Name) and " | FRIEND" or ""
+                textLabel.Text = roleText..": "..Target.Name.." | HP: "..math.floor(Target.Humanoid.Health)..friendText
+                
+                if IsFriend(Target.Name) then
+                    textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                end
             end
         end
     end
@@ -108,6 +131,10 @@ local function CleanupInvalidESP()
         and workspace.GameAssets:FindFirstChild('Teams') 
         and workspace.GameAssets.Teams:FindFirstChild('Survivor')
     
+    local ghostFolder = workspace:FindFirstChild('GameAssets') 
+        and workspace.GameAssets:FindFirstChild('Teams') 
+        and workspace.GameAssets.Teams:FindFirstChild('Ghost')
+    
     for _, espFolder in pairs(game:GetService('CoreGui'):GetChildren()) do
         if espFolder.Name:match("_ESP$") then
             local playerName = espFolder.Name:gsub("_ESP$", "")
@@ -121,6 +148,10 @@ local function CleanupInvalidESP()
                 found = true
             end
             
+            if ghostFolder and ghostFolder:FindFirstChild(playerName) then
+                found = true
+            end
+            
             if not found then
                 espFolder:Destroy()
             end
@@ -128,101 +159,10 @@ local function CleanupInvalidESP()
     end
 end
 
-local KillerESP = Tabs.MainTab:AddToggle("KillerESP", {Title = "Подсветка киллера", Default = false })
-
-KillerESP:OnChanged(function()
-
-    isKillerESPEnabled = Options.KillerESP.Value
-    
-
-    if isKillerESPEnabled == true then
-
-        while isKillerESPEnabled do
-
-            local killerFolder = workspace:FindFirstChild('GameAssets') 
-                and workspace.GameAssets:FindFirstChild('Teams') 
-                and workspace.GameAssets.Teams:FindFirstChild('Killer')
-                
-            if killerFolder then
-                for _, killerPlayer in pairs(killerFolder:GetChildren()) do
-                    if killerPlayer and killerPlayer.Parent and not killerPlayer:FindFirstChild(killerPlayer.Name.."_PESP") then
-                        ESP(killerPlayer, Color3.fromRGB(255, 0, 0), "Killer")
-                    end
-                    
-                    if killerPlayer and killerPlayer.Parent and killerPlayer:FindFirstChild("Humanoid") then
-                        UpdateESPText(killerPlayer, "Killer")
-                    end
-                end
-            end
-            
-            CleanupInvalidESP()
-
-            task.wait()
-        end
-
-    else
-        
-        local killerFolder = workspace:FindFirstChild('GameAssets') 
-            and workspace.GameAssets:FindFirstChild('Teams') 
-            and workspace.GameAssets.Teams:FindFirstChild('Killer')
-            
-        if killerFolder then
-            for _, killerPlayer in pairs(killerFolder:GetChildren()) do
-                if killerPlayer then
-                    UNESP(killerPlayer.Name, killerFolder)
-                end
-            end
-        end
-    end
-end)
-
-local SurvivorESP = Tabs.MainTab:AddToggle("SurvivorESP", {Title = "Подсветка игроков", Default = false })
-
-SurvivorESP:OnChanged(function()
-
-    isSurvivorESPEnabled = Options.SurvivorESP.Value
-    
-
-    if isSurvivorESPEnabled == true then
-
-        while isSurvivorESPEnabled do
-
-            local survivorFolder = workspace:FindFirstChild('GameAssets') 
-                and workspace.GameAssets:FindFirstChild('Teams') 
-                and workspace.GameAssets.Teams:FindFirstChild('Survivor')
-                
-            if survivorFolder then
-                for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
-                    if survivorPlayer and survivorPlayer.Parent and not survivorPlayer:FindFirstChild(survivorPlayer.Name.."_PESP") then
-                        ESP(survivorPlayer, Color3.fromRGB(0, 255, 0), "Player")
-                    end
-                    
-                    if survivorPlayer and survivorPlayer.Parent and survivorPlayer:FindFirstChild("Humanoid") then
-                        UpdateESPText(survivorPlayer, "Player")
-                    end
-                end
-            end
-            
-            CleanupInvalidESP()
-
-            task.wait()
-        end
-
-    else
-        
-        local survivorFolder = workspace:FindFirstChild('GameAssets') 
-            and workspace.GameAssets:FindFirstChild('Teams') 
-            and workspace.GameAssets.Teams:FindFirstChild('Survivor')
-            
-        if survivorFolder then
-            for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
-                if survivorPlayer then
-                    UNESP(survivorPlayer.Name, survivorFolder)
-                end
-            end
-        end
-    end
-end)
+Tabs.MainTab:CreateParagraph("Movement", {
+    Title = "Мувемент",
+    Content = ""
+})
 
 local StaminaMethodBypass = 'Модульный'
 
@@ -269,68 +209,6 @@ InfiniteStamina:OnChanged(function()
     end
 end)
 
-local NoBarriers = Tabs.MainTab:AddToggle("NoBarriers", {Title = "Убрать барьеры", Default = false })
-
-NoBarriers:OnChanged(function()
-
-    TNoBarriers = Options.NoBarriers.Value
-    
-
-    if TNoBarriers == true then
-
-        while TNoBarriers do
-
-            if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') and workspace.GameAssets.Map.Config.Barriers:FindFirstChild('Part', true).CanCollide == true then
- 			
-				task.spawn(function()
-					for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
-
-						if v:IsA('Part') then
-							v.CanCollide = false
-						end
-
-					end
-					for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
-
-						if v:IsA('Part') then
-							v.CanCollide = false
-						end
-
-					end
-				end)
-
-			end
-
-
-            task.wait()
-        end
-
-		else
-		if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map:FindFirstChild('Config') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') then
-		task.spawn(function()
-			for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
-
-				if v:IsA('Part') then
-					v.CanCollide = true
-				end
-
-				
-
-			end
-
-			for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
-
-						if v:IsA('Part') then
-							v.CanCollide = true
-						end
-
-				end
-
-		end)
-		end
-    end
-end)
-
 local EnableJump = Tabs.MainTab:AddToggle("EnableJump", {Title = "Включить прыжок", Default = false })
 
 EnableJump:OnChanged(function()
@@ -362,6 +240,149 @@ EnableJump:OnChanged(function()
 			end
     	end
 end)
+
+Tabs.MainTab:CreateParagraph("Other", {
+    Title = "Остальное",
+    Content = ""
+})
+
+local NoBarriers = Tabs.MainTab:AddToggle("NoBarriers", {Title = "Убрать барьеры", Default = false })
+
+NoBarriers:OnChanged(function()
+
+    TNoBarriers = Options.NoBarriers.Value
+    
+
+    if TNoBarriers == true then
+
+        while TNoBarriers do
+
+            if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') and workspace.GameAssets.Map.Config.Barriers:FindFirstChild('Part', true).CanCollide == true then
+ 			
+				task.spawn(function()
+					for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
+
+						if v:IsA('Part') then
+							v.CanCollide = false
+						end
+
+					end
+
+					if workspace.GameAssets.Map.Config:FindFirstChild('KillerOnly') then
+
+					for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
+
+						if v:IsA('Part') then
+							v.CanCollide = false
+						end
+
+					end
+
+					end
+
+
+				end)
+
+			end
+
+
+            task.wait()
+        end
+
+		else
+		if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map:FindFirstChild('Config') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') then
+		task.spawn(function()
+			for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
+
+				if v:IsA('Part') then
+					v.CanCollide = true
+				end
+
+				
+
+			end
+
+			if workspace.GameAssets.Map.Config:FindFirstChild('KillerOnly') then
+
+			for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
+
+				if v:IsA('Part') then
+					v.CanCollide = true
+				end
+
+			end
+
+			end
+
+		end)
+		end
+    end
+end)
+
+local CheckForMapDelete = nil
+
+local AntiKillerPlacements = Tabs.MainTab:AddToggle("AntiKillerPlacements", {Title = "Убирать штуки убийц", Default = false })
+
+local AntiKillerPlacementsFolderStorage = nil
+
+AntiKillerPlacements:OnChanged(function()
+
+    TAntiKillerPlacements = Options.AntiKillerPlacements.Value
+    
+
+    if TAntiKillerPlacements == true then
+
+		if not game:FindFirstChild('AntiKillerPlacements') then
+			AntiKillerPlacementsFolderStorage = Instance.new('HopperBin', game)
+			AntiKillerPlacementsFolderStorage.Name = 'AntiKillerPlacements'
+		else
+			AntiKillerPlacementsFolderStorage = game:FindFirstChild('AntiKillerPlacements')
+		end	
+
+		CheckForMapDelete = workspace.GameAssets.ChildRemoved:Connect(function(Child)
+			if Child.Name == 'Map' then
+				AntiKillerPlacementsFolderStorage:ClearAllChildren()
+				CheckForMapDelete:Disconnect()
+				CheckForMapDelete = nil
+			end
+		end)
+
+        while TAntiKillerPlacements do
+
+            if workspace.GameAssets:FindFirstChild('Teams') and workspace.GameAssets.Teams.Other:FindFirstChildOfClass('Model') then
+ 			
+				task.spawn(function()
+
+					for i,v in pairs(workspace.GameAssets.Teams.Other:GetChildren()) do
+
+						v.Parent = AntiKillerPlacementsFolderStorage
+
+					end
+
+				end)
+
+			end
+
+
+            task.wait()
+        end
+
+	else
+
+		if AntiKillerPlacementsFolderStorage ~= nil then
+
+			for i,v in pairs(AntiKillerPlacementsFolderStorage:GetChildren()) do
+				v.Parent = workspace.GameAssets.Teams.Other
+				CheckForMapDelete:Disconnect()
+				CheckForMapDelete = nil
+			end
+
+		end
+
+    	end
+end)
+
+
 
 Tabs.AbilitiesTab:CreateButton{
     Title = "Ударить (На любом сурве)",
@@ -421,7 +442,7 @@ Tabs.AbilitiesTab:CreateButton{
 }
 
 Tabs.AbilitiesTab:CreateButton{
-    Title = "Револьер (На любом сурве)",
+    Title = "Револьвер (На любом сурве)",
     Description = "",
     Callback = function()
 
@@ -467,3 +488,148 @@ Tabs.AbilitiesTab:CreateButton{
        game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
     end
 }
+
+
+local KillerESP = Tabs.VisualsTab:AddToggle("KillerESP", {Title = "Подсветка киллера", Default = false })
+
+KillerESP:OnChanged(function()
+
+    isKillerESPEnabled = Options.KillerESP.Value
+    
+
+    if isKillerESPEnabled == true then
+
+        while isKillerESPEnabled do
+
+            local killerFolder = workspace:FindFirstChild('GameAssets') 
+                and workspace.GameAssets:FindFirstChild('Teams') 
+                and workspace.GameAssets.Teams:FindFirstChild('Killer')
+                
+            if killerFolder then
+                for _, killerPlayer in pairs(killerFolder:GetChildren()) do
+                    if killerPlayer and killerPlayer.Parent and not killerPlayer:FindFirstChild(killerPlayer.Name.."_PESP") then
+                        ESP(killerPlayer, Color3.fromRGB(255, 0, 0), "Killer")
+                    end
+                    
+                    if killerPlayer and killerPlayer.Parent and killerPlayer:FindFirstChild("Humanoid") then
+                        UpdateESPText(killerPlayer, "Killer")
+                    end
+                end
+            end
+            
+            CleanupInvalidESP()
+
+            task.wait()
+        end
+
+    else
+        
+        local killerFolder = workspace:FindFirstChild('GameAssets') 
+            and workspace.GameAssets:FindFirstChild('Teams') 
+            and workspace.GameAssets.Teams:FindFirstChild('Killer')
+            
+        if killerFolder then
+            for _, killerPlayer in pairs(killerFolder:GetChildren()) do
+                if killerPlayer then
+                    UNESP(killerPlayer.Name, killerFolder)
+                end
+            end
+        end
+    end
+end)
+
+local SurvivorESP = Tabs.VisualsTab:AddToggle("SurvivorESP", {Title = "Подсветка игроков", Default = false })
+
+SurvivorESP:OnChanged(function()
+
+    isSurvivorESPEnabled = Options.SurvivorESP.Value
+    
+
+    if isSurvivorESPEnabled == true then
+
+        while isSurvivorESPEnabled do
+
+            local survivorFolder = workspace:FindFirstChild('GameAssets') 
+                and workspace.GameAssets:FindFirstChild('Teams') 
+                and workspace.GameAssets.Teams:FindFirstChild('Survivor')
+                
+            if survivorFolder then
+                for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
+                    if survivorPlayer and survivorPlayer.Parent and not survivorPlayer:FindFirstChild(survivorPlayer.Name.."_PESP") then
+                        ESP(survivorPlayer, Color3.fromRGB(0, 255, 0), "Player")
+                    end
+                    
+                    if survivorPlayer and survivorPlayer.Parent and survivorPlayer:FindFirstChild("Humanoid") then
+                        UpdateESPText(survivorPlayer, "Player")
+                    end
+                end
+            end
+            
+            CleanupInvalidESP()
+
+            task.wait()
+        end
+
+    else
+        
+        local survivorFolder = workspace:FindFirstChild('GameAssets') 
+            and workspace.GameAssets:FindFirstChild('Teams') 
+            and workspace.GameAssets.Teams:FindFirstChild('Survivor')
+            
+        if survivorFolder then
+            for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
+                if survivorPlayer then
+                    UNESP(survivorPlayer.Name, survivorFolder)
+                end
+            end
+        end
+    end
+end)
+
+local GhostESP = Tabs.VisualsTab:AddToggle("GhostESP", {Title = "Подсветка призраков", Default = false })
+
+GhostESP:OnChanged(function()
+
+    isGhostESPEnabled = Options.GhostESP.Value
+    
+
+    if isGhostESPEnabled == true then
+
+        while isGhostESPEnabled do
+
+            local ghostFolder = workspace:FindFirstChild('GameAssets') 
+                and workspace.GameAssets:FindFirstChild('Teams') 
+                and workspace.GameAssets.Teams:FindFirstChild('Ghost')
+                
+            if ghostFolder then
+                for _, ghostPlayer in pairs(ghostFolder:GetChildren()) do
+                    if ghostPlayer and ghostPlayer.Parent and not ghostPlayer:FindFirstChild(ghostPlayer.Name.."_PESP") then
+                        ESP(ghostPlayer, Color3.fromRGB(200, 200, 200), "Ghost")
+                    end
+                    
+                    if ghostPlayer and ghostPlayer.Parent and ghostPlayer:FindFirstChild("Humanoid") then
+                        UpdateESPText(ghostPlayer, "Ghost")
+                    end
+                end
+            end
+            
+            CleanupInvalidESP()
+
+            task.wait()
+        end
+
+    else
+        
+        local ghostFolder = workspace:FindFirstChild('GameAssets') 
+            and workspace.GameAssets:FindFirstChild('Teams') 
+            and workspace.GameAssets.Teams:FindFirstChild('Ghost')
+            
+        if ghostFolder then
+            for _, ghostPlayer in pairs(ghostFolder:GetChildren()) do
+                if ghostPlayer then
+                    UNESP(ghostPlayer.Name, ghostFolder)
+                end
+            end
+        end
+    end
+end)
