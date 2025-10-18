@@ -19,6 +19,10 @@ local Tabs = {
         Title = "Main",
         Icon = "phosphor-users-bold"
     },
+	AbilitiesTab = Window:CreateTab{
+        Title = "Abilities",
+        Icon = "phosphor-users-bold"
+    },
 }
 
 local Options = Library.Options
@@ -265,34 +269,201 @@ InfiniteStamina:OnChanged(function()
     end
 end)
 
-Tabs.MainTab:CreateButton{
+local NoBarriers = Tabs.MainTab:AddToggle("NoBarriers", {Title = "Убрать барьеры", Default = false })
+
+NoBarriers:OnChanged(function()
+
+    TNoBarriers = Options.NoBarriers.Value
+    
+
+    if TNoBarriers == true then
+
+        while TNoBarriers do
+
+            if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') and workspace.GameAssets.Map.Config.Barriers:FindFirstChild('Part', true).CanCollide == true then
+ 			
+				task.spawn(function()
+					for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
+
+						if v:IsA('Part') then
+							v.CanCollide = false
+						end
+
+					end
+					for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
+
+						if v:IsA('Part') then
+							v.CanCollide = false
+						end
+
+					end
+				end)
+
+			end
+
+
+            task.wait()
+        end
+
+		else
+		if workspace.GameAssets:FindFirstChild('Map') and workspace.GameAssets.Map:FindFirstChild('Config') and workspace.GameAssets.Map.Config:FindFirstChild('Barriers') then
+		task.spawn(function()
+			for i,v in pairs(workspace.GameAssets.Map.Config.Barriers:GetDescendants()) do
+
+				if v:IsA('Part') then
+					v.CanCollide = true
+				end
+
+				
+
+			end
+
+			for i,v in pairs(workspace.GameAssets.Map.Config.KillerOnly:GetDescendants()) do
+
+						if v:IsA('Part') then
+							v.CanCollide = true
+						end
+
+				end
+
+		end)
+		end
+    end
+end)
+
+local EnableJump = Tabs.MainTab:AddToggle("EnableJump", {Title = "Включить прыжок", Default = false })
+
+EnableJump:OnChanged(function()
+
+    TEnableJump = Options.EnableJump.Value
+    
+
+    if TEnableJump == true then
+
+        while TEnableJump do
+
+            if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').JumpPower < 50 then
+ 			
+				game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').UseJumpPower = true
+				game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').JumpPower = 50
+
+			end
+
+
+            task.wait()
+        end
+
+		else
+		if game.Players.LocalPlayer.Character ~= nil and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').JumpPower >= 50 then
+ 			
+				game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').UseJumpPower = true
+				game.Players.LocalPlayer.Character:FindFirstChild('Humanoid').JumpPower = 0
+
+			end
+    	end
+end)
+
+Tabs.AbilitiesTab:CreateButton{
     Title = "Ударить (На любом сурве)",
     Description = "",
     Callback = function()
+		
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
+
        game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Punch')
     end
 }
 
-Tabs.MainTab:CreateButton{
+Tabs.AbilitiesTab:CreateButton{
     Title = "Блокировать (На любом сурве)",
     Description = "",
     Callback = function()
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
        game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Block')
     end
 }
 
-Tabs.MainTab:CreateButton{
+Tabs.AbilitiesTab:CreateButton{
     Title = "Банан (На любом сурве)",
     Description = "",
     Callback = function()
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
        game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Banana')
     end
 }
 
-Tabs.MainTab:CreateButton{
+Tabs.AbilitiesTab:CreateButton{
     Title = "Хотдог (На любом сурве)",
     Description = "",
     Callback = function()
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
        game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Hotdog')
+    end
+}
+
+Tabs.AbilitiesTab:CreateButton{
+    Title = "Револьер (На любом сурве)",
+    Description = "",
+    Callback = function()
+
+		local AbilityNameTarget = 'Revolver'
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
+    end
+}
+
+Tabs.AbilitiesTab:CreateButton{
+    Title = "Инвизка (На любом сурве)",
+    Description = "",
+    Callback = function()
+
+		local AbilityNameTarget = 'Cloak'
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
+    end
+}
+
+Tabs.AbilitiesTab:CreateButton{
+    Title = "Taunt (На любом сурве)",
+    Description = "",
+    Callback = function()
+
+		local AbilityNameTarget = 'Taunt'
+
+		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
+			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
+			return
+		end
+
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
     end
 }
