@@ -1,0 +1,298 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+ 
+local Window = Library:CreateWindow{
+    Title = `Die of Death`,
+    SubTitle = "| by Creatysm",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(830, 525),
+    Resize = true,
+    MinSize = Vector2.new(470, 380),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+}
+
+local Tabs = {
+    MainTab = Window:CreateTab{
+        Title = "Main",
+        Icon = "phosphor-users-bold"
+    },
+}
+
+local Options = Library.Options
+
+
+local function ESP(Target, colorRGB, roleText)
+    colorRGB = colorRGB or Color3.fromRGB(255, 0, 0)
+    roleText = roleText or "Killer"
+
+    local a = Instance.new("BoxHandleAdornment")
+    a.Name = Target.Name.."_PESP"
+    a.Parent = Target
+    a.Adornee = Target
+    a.AlwaysOnTop = true
+    a.ZIndex = 0
+    a.Color3 = colorRGB
+    a.Transparency = 0.5
+    a.Size = Vector3.new(2, 5, 1)
+    local BillboardGui = Instance.new("BillboardGui")
+    local TextLabel = Instance.new("TextLabel")
+    local ESPholder = Instance.new("Folder")
+    ESPholder.Name = Target.Name..'_ESP'
+    ESPholder.Parent = game:GetService('CoreGui')
+    BillboardGui.Adornee = Target
+    BillboardGui.Name = Target.Name
+    BillboardGui.Parent = ESPholder
+    BillboardGui.Size = UDim2.new(0, 100, 0, 150)
+    BillboardGui.StudsOffset = Vector3.new(0, -1, 0)
+    BillboardGui.AlwaysOnTop = true
+    TextLabel.Parent = BillboardGui
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Position = UDim2.new(0, 0, 0, -50)
+    TextLabel.Size = UDim2.new(0, 100, 0, 100)
+    TextLabel.Font = Enum.Font.SourceSansSemibold
+    TextLabel.TextSize = 20
+    TextLabel.TextColor3 = colorRGB
+    TextLabel.TextStrokeTransparency = 0
+    TextLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+    TextLabel.Text = roleText..": "..Target.Name
+    TextLabel.ZIndex = 10
+
+end
+
+
+local function UNESP(TargetName, Folder)
+    if game:GetService('CoreGui'):FindFirstChild(TargetName..'_ESP') then
+        game:GetService('CoreGui'):FindFirstChild(TargetName..'_ESP'):Destroy()
+    end
+
+    for i,v in pairs(Folder:GetChildren()) do
+        if v.Name == TargetName then
+            if v:FindFirstChild(TargetName..'_PESP') then
+                v:FindFirstChild(TargetName..'_PESP'):Destroy()
+            end
+        end
+    end
+
+end
+
+local function UpdateESPText(Target, roleText)
+    if not Target or not Target.Parent then 
+        return 
+    end
+    
+    local ESPholder = game:GetService('CoreGui'):FindFirstChild(Target.Name..'_ESP')
+    if ESPholder then
+        local billboard = ESPholder:FindFirstChild(Target.Name)
+        if billboard and billboard:IsA("BillboardGui") then
+            local textLabel = billboard:FindFirstChild("TextLabel")
+            if textLabel and Target:FindFirstChild("Humanoid") then
+                textLabel.Text = roleText..": "..Target.Name.." | HP: "..math.floor(Target.Humanoid.Health)
+            end
+        end
+    end
+end
+
+local function CleanupInvalidESP()
+    local killerFolder = workspace:FindFirstChild('GameAssets') 
+        and workspace.GameAssets:FindFirstChild('Teams') 
+        and workspace.GameAssets.Teams:FindFirstChild('Killer')
+    
+    local survivorFolder = workspace:FindFirstChild('GameAssets') 
+        and workspace.GameAssets:FindFirstChild('Teams') 
+        and workspace.GameAssets.Teams:FindFirstChild('Survivor')
+    
+    for _, espFolder in pairs(game:GetService('CoreGui'):GetChildren()) do
+        if espFolder.Name:match("_ESP$") then
+            local playerName = espFolder.Name:gsub("_ESP$", "")
+            local found = false
+            
+            if killerFolder and killerFolder:FindFirstChild(playerName) then
+                found = true
+            end
+            
+            if survivorFolder and survivorFolder:FindFirstChild(playerName) then
+                found = true
+            end
+            
+            if not found then
+                espFolder:Destroy()
+            end
+        end
+    end
+end
+
+local KillerESP = Tabs.MainTab:AddToggle("KillerESP", {Title = "Подсветка киллера", Default = false })
+
+KillerESP:OnChanged(function()
+
+    isKillerESPEnabled = Options.KillerESP.Value
+    
+
+    if isKillerESPEnabled == true then
+
+        while isKillerESPEnabled do
+
+            local killerFolder = workspace:FindFirstChild('GameAssets') 
+                and workspace.GameAssets:FindFirstChild('Teams') 
+                and workspace.GameAssets.Teams:FindFirstChild('Killer')
+                
+            if killerFolder then
+                for _, killerPlayer in pairs(killerFolder:GetChildren()) do
+                    if killerPlayer and killerPlayer.Parent and not killerPlayer:FindFirstChild(killerPlayer.Name.."_PESP") then
+                        ESP(killerPlayer, Color3.fromRGB(255, 0, 0), "Killer")
+                    end
+                    
+                    if killerPlayer and killerPlayer.Parent and killerPlayer:FindFirstChild("Humanoid") then
+                        UpdateESPText(killerPlayer, "Killer")
+                    end
+                end
+            end
+            
+            CleanupInvalidESP()
+
+            task.wait()
+        end
+
+    else
+        
+        local killerFolder = workspace:FindFirstChild('GameAssets') 
+            and workspace.GameAssets:FindFirstChild('Teams') 
+            and workspace.GameAssets.Teams:FindFirstChild('Killer')
+            
+        if killerFolder then
+            for _, killerPlayer in pairs(killerFolder:GetChildren()) do
+                if killerPlayer then
+                    UNESP(killerPlayer.Name, killerFolder)
+                end
+            end
+        end
+    end
+end)
+
+local SurvivorESP = Tabs.MainTab:AddToggle("SurvivorESP", {Title = "Подсветка игроков", Default = false })
+
+SurvivorESP:OnChanged(function()
+
+    isSurvivorESPEnabled = Options.SurvivorESP.Value
+    
+
+    if isSurvivorESPEnabled == true then
+
+        while isSurvivorESPEnabled do
+
+            local survivorFolder = workspace:FindFirstChild('GameAssets') 
+                and workspace.GameAssets:FindFirstChild('Teams') 
+                and workspace.GameAssets.Teams:FindFirstChild('Survivor')
+                
+            if survivorFolder then
+                for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
+                    if survivorPlayer and survivorPlayer.Parent and not survivorPlayer:FindFirstChild(survivorPlayer.Name.."_PESP") then
+                        ESP(survivorPlayer, Color3.fromRGB(0, 255, 0), "Player")
+                    end
+                    
+                    if survivorPlayer and survivorPlayer.Parent and survivorPlayer:FindFirstChild("Humanoid") then
+                        UpdateESPText(survivorPlayer, "Player")
+                    end
+                end
+            end
+            
+            CleanupInvalidESP()
+
+            task.wait()
+        end
+
+    else
+        
+        local survivorFolder = workspace:FindFirstChild('GameAssets') 
+            and workspace.GameAssets:FindFirstChild('Teams') 
+            and workspace.GameAssets.Teams:FindFirstChild('Survivor')
+            
+        if survivorFolder then
+            for _, survivorPlayer in pairs(survivorFolder:GetChildren()) do
+                if survivorPlayer then
+                    UNESP(survivorPlayer.Name, survivorFolder)
+                end
+            end
+        end
+    end
+end)
+
+local StaminaMethodBypass = 'Модульный'
+
+local StaminaBypassSelect = Tabs.MainTab:CreateDropdown("StaminaBypassMethod", {
+    Title = "Метод обхода стамины",
+    Values = {"Модульный", "Эвентный"},
+    Multi = false,
+    Default = 'Модульный',
+})
+
+StaminaBypassSelect:OnChanged(function(Value)
+    StaminaMethodBypass = Value
+end)
+
+local InfiniteStamina = Tabs.MainTab:AddToggle("InfiniteStamina", {Title = "Бесконечная стамина", Default = false })
+
+InfiniteStamina:OnChanged(function()
+
+    InfiniteStamina = Options.InfiniteStamina.Value
+    
+
+    if InfiniteStamina == true then
+
+		local ModuleBypass = require(game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Client.Modules.Movement)
+		
+
+
+        while InfiniteStamina do
+
+            if game.Players.LocalPlayer.Character ~= nil and (workspace.GameAssets.Teams.Survivor:FindFirstChild(game.Players.LocalPlayer.Name) or workspace.GameAssets.Teams.Killer:FindFirstChild(game.Players.LocalPlayer.Name)) then
+ 			
+				if StaminaMethodBypass == 'Модульный' then
+					ModuleBypass.Stamina = ModuleBypass.MaxStamina
+				else
+					local event = game:GetService("ReplicatedStorage").Events.RemoteEvents.StaminaModifier
+					firesignal(event.OnClientEvent, ModuleBypass.MaxStamina-ModuleBypass.Stamina)
+				end
+
+			end
+
+            task.wait()
+        end
+
+    end
+end)
+
+Tabs.MainTab:CreateButton{
+    Title = "Ударить (На любом сурве)",
+    Description = "",
+    Callback = function()
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Punch')
+    end
+}
+
+Tabs.MainTab:CreateButton{
+    Title = "Блокировать (На любом сурве)",
+    Description = "",
+    Callback = function()
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Block')
+    end
+}
+
+Tabs.MainTab:CreateButton{
+    Title = "Банан (На любом сурве)",
+    Description = "",
+    Callback = function()
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Banana')
+    end
+}
+
+Tabs.MainTab:CreateButton{
+    Title = "Хотдог (На любом сурве)",
+    Description = "",
+    Callback = function()
+       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Hotdog')
+    end
+}
