@@ -35,7 +35,7 @@ local Tabs = {
 local Options = Library.Options
 
 local function IsFriend(playerName)
-    local player = game.Players:FindFifrstChild(playerName)
+    local player = game.Players:FindFirstChild(playerName)
     if player then
         return LocalPlayer:IsFriendsWith(player.UserId)
     end
