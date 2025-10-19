@@ -167,13 +167,13 @@ Tabs.MainTab:CreateParagraph("Movement", {
     Content = ""
 })
 
-local StaminaMethodBypass = 'Модульный'
+local StaminaMethodBypass = 'Эвентный'
 
 local StaminaBypassSelect = Tabs.MainTab:CreateDropdown("StaminaBypassMethod", {
     Title = "Метод обхода стамины",
     Values = {"Модульный", "Эвентный"},
     Multi = false,
-    Default = 'Модульный',
+    Default = 'Эвентный',
 })
 
 StaminaBypassSelect:OnChanged(function(Value)
@@ -242,6 +242,54 @@ EnableJump:OnChanged(function()
 
 			end
     	end
+end)
+
+local SprintSpeedValue = 16
+local OldSprintSpeedValue = nil
+
+local SprintSpeedInput = Tabs.MainTab:CreateInput("SprintSpeedInput", {
+    Title = "Скорость спринта",
+    Default = '16',
+    Placeholder = "Введите число",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        SprintSpeedValue = tonumber(Value) or 16
+    end
+})
+
+local SprintSpeedChanger = Tabs.MainTab:AddToggle("SprintSpeedChanger", {Title = "Изменять скорость спринта", Default = false })
+
+SprintSpeedChanger:OnChanged(function()
+    TSprintSpeedChanger = Options.SprintSpeedChanger.Value
+    
+    if TSprintSpeedChanger == true then
+        if workspace.GameAssets.Teams.Killer:FindFirstChild(PlayerName) == nil and workspace.GameAssets.Teams.Survivor:FindFirstChild(PlayerName) == nil then
+            Options.SprintSpeedChanger:SetValue(false)
+            return
+        end
+
+        if LocalPlayer.Character and not OldSprintSpeedValue then
+            OldSprintSpeedValue = LocalPlayer.Character:GetAttribute('SprintSpeed') or 16
+        end
+        
+        while TSprintSpeedChanger do
+            if workspace.GameAssets.Teams.Killer:FindFirstChild(LocalPlayer.Name) == nil and workspace.GameAssets.Teams.Survivor:FindFirstChild(LocalPlayer.Name) == nil then
+                Options.SprintSpeedChanger:SetValue(false)
+                break
+            end
+            
+            if LocalPlayer.Character then
+                LocalPlayer.Character:SetAttribute('SprintSpeed', SprintSpeedValue)
+            end
+            task.wait()
+        end
+    else
+        if LocalPlayer.Character and OldSprintSpeedValue then
+            LocalPlayer.Character:SetAttribute('SprintSpeed', OldSprintSpeedValue)
+        end
+        OldSprintSpeedValue = nil
+    end
 end)
 
 Tabs.MainTab:CreateParagraph("Other", {
@@ -562,4 +610,118 @@ GhostESP:OnChanged(function()
             end
         end
     end
+end)
+
+Tabs.VisualsTab:CreateParagraph("Other", {
+    Title = "Другое",
+    Content = ""
+})
+
+local FovSliderValue = 70
+
+local FovSlider = Tabs.VisualsTab:CreateSlider("FovSlider", {
+    Title = "Поле зрения (FOV)",
+    Description = "",
+    Default = 70,
+    Min = 70,
+    Max = 120,
+    Rounding = 1,
+    Callback = function(Value)
+        FovSliderValue = Value
+        if TFovChanger and workspace.CurrentCamera then
+            workspace.CurrentCamera.FieldOfView = Value
+        end
+    end
+})
+
+local OriginalIndex = nil
+local OriginalNewIndex = nil
+local FovConnection = nil
+
+local FovChanger = Tabs.VisualsTab:AddToggle("FovChanger", {Title = "Изменять FOV", Default = false })
+
+FovChanger:OnChanged(function()
+    TFovChanger = Options.FovChanger.Value
+    
+    if TFovChanger == true then
+        local Camera = workspace.CurrentCamera
+        local mt = getrawmetatable(game)
+        setreadonly(mt, false)
+        
+        OriginalIndex = mt.__index
+        OriginalNewIndex = mt.__newindex
+        
+        mt.__index = newcclosure(function(self, key)
+            if self == Camera and key == "FieldOfView" then
+                return FovSliderValue
+            end
+            return OriginalIndex(self, key)
+        end)
+        
+        mt.__newindex = newcclosure(function(self, key, value)
+            if self == Camera and key == "FieldOfView" then
+                return
+            end
+            return OriginalNewIndex(self, key, value)
+        end)
+        
+        setreadonly(mt, true)
+        
+        FovConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            if Camera and TFovChanger then
+                pcall(function()
+                    OriginalNewIndex(Camera, "FieldOfView", FovSliderValue)
+                end)
+            end
+        end)
+    else
+        if FovConnection then
+            FovConnection:Disconnect()
+            FovConnection = nil
+        end
+        
+        if OriginalIndex and OriginalNewIndex then
+            local mt = getrawmetatable(game)
+            setreadonly(mt, false)
+            mt.__index = OriginalIndex
+            mt.__newindex = OriginalNewIndex
+            setreadonly(mt, true)
+            
+            OriginalIndex = nil
+            OriginalNewIndex = nil
+        end
+        
+        if workspace.CurrentCamera then
+            workspace.CurrentCamera.FieldOfView = 70
+        end
+    end
+end)
+
+
+local ExtendedZoom = Tabs.VisualsTab:AddToggle("ExtendedZoom", {Title = "Анлокер зума", Default = false })
+
+ExtendedZoom:OnChanged(function()
+
+    TExtendedZoom = Options.ExtendedZoom.Value
+    
+
+    if TExtendedZoom == true then
+
+        while TExtendedZoom do
+
+            if game.Players.LocalPlayer ~= nil then
+ 			
+				game.Players.LocalPlayer.CameraMaxZoomDistance = 999
+
+			end
+
+
+            task.wait()
+        end
+
+		else
+		
+		game.Players.LocalPlayer.CameraMaxZoomDistance = 30
+
+    	end
 end)
