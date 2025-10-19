@@ -5,6 +5,9 @@ local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercon
 local LocalPlayer = game.Players.LocalPlayer
 local PlayerName = LocalPlayer.Name
 
+local AbilityModule = require(game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Client.Modules.Ability)
+local AbilityConfig = require(game.ReplicatedStorage.ClientModules.AbilityConfig)
+
 local Window = Library:CreateWindow{
     Title = `Die of Death`,
     SubTitle = "| by Creatysm",
@@ -382,113 +385,40 @@ AntiKillerPlacements:OnChanged(function()
     	end
 end)
 
+local AbilitiesSelector = Tabs.AbilitiesTab:CreateDropdown("AbilitiesSelector", {
+    Title = "Способки сурвов",
+    Values = {"Taunt", 'Hotdog', "Banana", "Block", 'Punch', 'Cloak', 'Caretaker', 'Dash', 'BonusPad', 'Adrenaline',},
+    Multi = true,
+   	Default = {},
+})
+
+local AbilitiesSelectedGiver = {}
+
+AbilitiesSelector:OnChanged(function(Value)
+    for Value, State in next, Value do
+        table.insert(AbilitiesSelectedGiver, Value)
+    end
+end)
+
 
 
 Tabs.AbilitiesTab:CreateButton{
-    Title = "Ударить (На любом сурве)",
+    Title = "Выдать выбранные абилки",
     Description = "",
     Callback = function()
-		
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
+       
+	   for i,Value in pairs(AbilitiesSelectedGiver) do
 
+		local AbilityNeeded = Value
 
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Punch')
+		local abilityData = AbilityConfig[AbilityNeeded]
+
+		AbilityModule.CreateAbility(abilityData, AbilityNeeded)
+
+	   end
+        
     end
 }
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Блокировать (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Block')
-    end
-}
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Банан (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Banana')
-    end
-}
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Хотдог (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer('Hotdog')
-    end
-}
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Револьвер (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		local AbilityNameTarget = 'Revolver'
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
-    end
-}
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Инвизка (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		local AbilityNameTarget = 'Cloak'
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
-    end
-}
-
-Tabs.AbilitiesTab:CreateButton{
-    Title = "Taunt (На любом сурве)",
-    Description = "",
-    Callback = function()
-
-		local AbilityNameTarget = 'Taunt'
-
-		if not workspace.GameAssets.Teams:FindFirstChild('Survivor'):FindFirstChild(game.Players.LocalPlayer.Name) then
-			Library:Notify({Title = "Ошибка",Content = "Ты не сурв.",SubContent = "",Duration = 1})
-			return
-		end
-
-       game:GetService("ReplicatedStorage").Events.RemoteFunctions.UseAbility:InvokeServer(AbilityNameTarget)
-    end
-}
-
 
 local KillerESP = Tabs.VisualsTab:AddToggle("KillerESP", {Title = "Подсветка киллера", Default = false })
 
