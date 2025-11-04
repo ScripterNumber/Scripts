@@ -39,7 +39,7 @@ local function UpdatePositions()
 		if FunctionLabels[Name] then
 			local YPosition = (i - 1) * 27
 			local TweenInfo1 = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-			local Tween1 = TweenService:Create(FunctionLabels[Name], TweenInfo1, {Position = UDim2.new(1, 0, 0, YPosition)})
+			local Tween1 = TweenService:Create(FunctionLabels[Name], TweenInfo1, {Position = UDim2.new(0.96, 0, 0, YPosition)})
 			Tween1:Play()
 		end
 	end
@@ -81,7 +81,7 @@ function ArrayList.AddFunction(Name)
 	local YPosition = (OrderIndex - 1) * 27
 
 	local TweenInfo1 = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	local Tween1 = TweenService:Create(Label, TweenInfo1, {Position = UDim2.new(1, 0, 0, YPosition)})
+	local Tween1 = TweenService:Create(Label, TweenInfo1, {Position = UDim2.new(0.96, 0, 0, YPosition)})
 	Tween1:Play()
 end
 
