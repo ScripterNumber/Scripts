@@ -1,0 +1,364 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local ArrayListManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ScripterNumber/Scripts/refs/heads/main/ArrayList"))()
+
+local window = Fluent:CreateWindow({
+    Title = "Array List Test",
+    SubTitle = "",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    MainTab = window:AddTab({ Title = "Main", Icon = "" }),
+    OtherTab = window:AddTab({ Title = "Other", Icon = "" }),
+}
+
+local Options = Fluent.Options
+
+_G.RagdollTimerEnabled = false
+_G.SpiderBoostEnabled = false
+_G.AutoSaveEnabled = false
+
+local RagdollTimer = Tabs.MainTab:AddToggle("RagdollTimer", {Title = "Таймер Рагдолла", Default = false})
+
+RagdollTimer:OnChanged(function()
+    _G.RagdollTimerEnabled = Options.RagdollTimer.Value
+    
+    if _G.RagdollTimerEnabled == true then
+        ArrayListManager.AddFunction('RagdollTimer')
+    else
+        ArrayListManager.RemoveFunction('RagdollTimer')
+    end
+end)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local activeTimers = {}
+
+local function createTimer(character)
+    if activeTimers[character] then
+        return
+    end
+    
+    activeTimers[character] = true
+    
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "TimerGui"
+    billboard.Size = UDim2.new(0, 200, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = head
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.TextColor3 = Color3.new(1, 0, 0)
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.Parent = billboard
+    
+    local timeLeft = 5
+    
+    while timeLeft > 0 do
+        textLabel.Text = string.format("%.1f", timeLeft)
+        task.wait(0.1)
+        timeLeft = timeLeft - 0.1
+    end
+    
+    billboard:Destroy()
+    activeTimers[character] = nil
+end
+
+RunService.Heartbeat:Connect(function()
+    if not _G.RagdollTimerEnabled then return end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            local ragAttribute = player.Character:GetAttribute("rag")
+            if ragAttribute == true and not activeTimers[player.Character] then
+                task.spawn(createTimer, player.Character)
+            end
+        end
+    end
+end)
+
+local SpiderBoost = Tabs.MainTab:AddToggle("SpiderBoost", {Title = "Ранбуст Человека паука", Default = false})
+
+SpiderBoost:OnChanged(function()
+    _G.SpiderBoostEnabled = Options.SpiderBoost.Value
+    
+    if _G.SpiderBoostEnabled == true then
+        ArrayListManager.AddFunction('SpiderBoost')
+        
+        local LocalPlayer = game.Players.LocalPlayer
+        local Character = LocalPlayer.Character
+        
+        if _G.ToolBoost ~= nil then
+            _G.ToolBoost:Disconnect()
+        end
+        _G.ToolBoost = nil
+        
+        _G.ToolBoost = game.Players.LocalPlayer.Character.ChildAdded:Connect(function(child)
+            if not _G.SpiderBoostEnabled then return end
+            
+            if child:IsA('RopeConstraint') then
+                local rope = game.Players.LocalPlayer.Character:FindFirstChild("RopeConstraint", true)
+                if not rope.Attachment1 and not rope.Attachment1.Parent and not rope.Attachment1.Parent.Parent then
+                    return
+                end
+                if rope.Attachment1.Parent.Parent:FindFirstChild("Humanoid") then
+                    return
+                end
+                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if rope.Attachment1.WorldPosition.Y > hrp.Position.Y then
+                    return
+                end
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = 51
+                child.WinchEnabled = true
+                child.WinchForce = 35075
+                child.WinchResponsiveness = 105
+                child.WinchSpeed = 105
+            end
+        end)
+        
+        LocalPlayer.CharacterAdded:Connect(function(Char)
+            if not _G.SpiderBoostEnabled then return end
+            
+            if _G.ToolBoost then
+                _G.ToolBoost:Disconnect()
+            end
+            _G.ToolBoost = nil
+            
+            _G.ToolBoost = game.Players.LocalPlayer.Character.ChildAdded:Connect(function(child)
+                if not _G.SpiderBoostEnabled then return end
+                
+                if child:IsA('RopeConstraint') then
+                    local rope = game.Players.LocalPlayer.Character:FindFirstChild("RopeConstraint", true)
+                    if not rope.Attachment1 and not rope.Attachment1.Parent and not rope.Attachment1.Parent.Parent then
+                        return
+                    end
+                    if rope.Attachment1.Parent.Parent:FindFirstChild("Humanoid") then
+                        return
+                    end
+                    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if rope.Attachment1.WorldPosition.Y > hrp.Position.Y then
+                        return
+                    end
+                    humanoid.UseJumpPower = true
+                    humanoid.JumpPower = 51
+                    child.WinchEnabled = true
+                    child.WinchForce = 35075
+                    child.WinchResponsiveness = 105
+                    child.WinchSpeed = 105
+                end
+            end)
+        end)
+    else
+        ArrayListManager.RemoveFunction('SpiderBoost')
+        
+        if _G.ToolBoost ~= nil then
+            _G.ToolBoost:Disconnect()
+        end
+        _G.ToolBoost = nil
+    end
+end)
+
+local AutoSave = Tabs.MainTab:AddToggle("AutoSave", {Title = "Авто сейв верёвкой", Default = false})
+
+AutoSave:OnChanged(function()
+    _G.AutoSaveEnabled = Options.AutoSave.Value
+    
+    if _G.AutoSaveEnabled == true then
+        ArrayListManager.AddFunction('AutoSave')
+    else
+        ArrayListManager.RemoveFunction('AutoSave')
+    end
+end)
+
+local function setupAutoSave()
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    local Humanoid = Character:WaitForChild("Humanoid")
+    
+    local BlockedParts = {Character, 
+        workspace.RagdollParts, 
+        workspace.PoisonParts, 
+        workspace.KillParts,
+        workspace.SignPlaceRegion
+    }
+    
+    local shouldStop = false
+    local lastHealth = Humanoid.Health
+    
+    local function InitBlockedParts()
+        spawn(function()
+            for i,v in pairs(workspace:GetChildren()) do
+                if v.Name == 'Wedge' or v.Name == 'Part' or v.Name == 'po' then
+                    table.insert(BlockedParts, v)
+                end
+            end
+        end)
+    end
+    
+    InitBlockedParts()
+    
+    local function findNearbyParts(radius)
+        local overlapParams = OverlapParams.new()
+        overlapParams.FilterType = Enum.RaycastFilterType.Blacklist
+        overlapParams.FilterDescendantsInstances = BlockedParts
+        
+        local parts = workspace:GetPartBoundsInRadius(HumanoidRootPart.Position, radius, overlapParams)
+        
+        for _, part in pairs(parts) do
+            if part.CanQuery == true then
+                return true
+            end
+        end
+        
+        return false
+    end
+    
+    local function placeRope()
+        local startPos = HumanoidRootPart.Position
+        local direction = Vector3.new(0, -0.1, 0)
+        
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+        raycastParams.FilterDescendantsInstances = {Character}
+        
+        local rayResult = workspace:Raycast(startPos, direction * 100000, raycastParams)
+        
+        if rayResult then
+            local hitPos = rayResult.Position
+            local targetDirection = (hitPos - startPos).Unit
+            local distance = (hitPos - startPos).Magnitude
+            
+            local args = {
+                Ray.new(startPos, targetDirection * distance)
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("MouseClick"):FireServer(unpack(args))
+        else
+            local args = {
+                Ray.new(startPos, direction * 100000)
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("MouseClick"):FireServer(unpack(args))
+        end
+    end
+    
+    Humanoid.HealthChanged:Connect(function(health)
+        if not _G.AutoSaveEnabled then return end
+        
+        if health >= lastHealth then
+            shouldStop = true
+            lastHealth = health
+            return
+        end
+        
+        lastHealth = health
+        
+        shouldStop = false
+        
+        spawn(function()
+            if Player.Backpack:FindFirstChild('Верёвка') then
+                Player.Backpack['Верёвка'].Parent = Character
+            end
+            
+            if not Character:FindFirstChild('Верёвка') then
+                return
+            end
+            
+            if Character:FindFirstChild('RopeConstraint') then
+                if shouldStop then return end
+                placeRope()
+                task.wait(0.2)
+                if shouldStop then return end
+                if findNearbyParts(15) then
+                    placeRope()
+                end
+                task.wait(1)
+                if shouldStop then return end
+                placeRope()
+            else
+                if shouldStop then return end
+                placeRope()
+                task.wait(1)
+                if shouldStop then return end
+                placeRope()
+            end
+        end)
+    end)
+end
+
+Tabs.OtherTab:AddButton({
+    Title = "Табличка в торсо",
+    Description = "",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+        local args = {
+            "remove",
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+
+        local args = {
+            "create",
+            humanoidRootPart.CFrame + Vector3.new(0, -2.7, 0)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+    end
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Удалить табличку",
+    Description = "",
+    Callback = function()
+        local args = {
+            "remove",
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+    end
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Заблокать трейд таблой",
+    Description = "",
+    Callback = function()
+        local args = {
+            "remove",
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+    
+         local args = {
+            "create",
+            CFrame.new(142.422531, 2050.04907, 127.88311, -0.668970048, 3.59919849e-09, -0.743288875, 4.84288378e-08, 1, -4.84287739e-08, 0.743291557, 6.83940371e-08, -0.668969691)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+
+    end
+})
+
+setupAutoSave()
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    setupAutoSave()
+end)
+
+
