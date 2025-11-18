@@ -595,37 +595,20 @@ VisualRain:OnChanged(function()
     if VisualRainToggle == true then
         ArrayListManager.AddFunction('visual rain')
         
-        if _G.WasVisualRain == false then
-
-            _G.WasVisualRain = true
-
+        if not _G.LightingProtectionHook then
+            _G.LightingProtectionEnabled = true
             local old_newindex
+            
             old_newindex = hookmetamethod(game, "__newindex", newcclosure(function(self, property, value)
-                if self == game.Lighting or self:IsDescendantOf(game.Lighting) then
-                    local caller = getcallingscript and getcallingscript()
-                    if caller == game.Players.LocalPlayer.PlayerGui.UI.LocalScript then
-                        return
-                    end
+                if _G.LightingProtectionEnabled and (self == game.Lighting or self:IsDescendantOf(game.Lighting)) then
+                    return
                 end
                 return old_newindex(self, property, value)
             end))
-
-            local old_namecall
-            old_namecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-                local method = getnamecallmethod()
-                local caller = getcallingscript and getcallingscript()
-                
-                if caller == game.Players.LocalPlayer.PlayerGui.UI.LocalScript then
-                    if method == "Destroy" or method == "Remove" then
-                        if self:IsDescendantOf(game.Lighting) then
-                            return
-                        end
-                    end
-                end
-                
-                return old_namecall(self, ...)
-            end))
-
+            
+            _G.LightingProtectionHook = old_newindex
+        else
+            _G.LightingProtectionEnabled = true
         end
 
         local RainM = game:GetService("ReplicatedStorage").RainM:Clone()
@@ -644,6 +627,9 @@ VisualRain:OnChanged(function()
         local RainSound = game:GetService("ReplicatedStorage").Sounds["Heavy Rain 2 (SFX)"]:Clone()
         RainSound.Parent = workspace
         RainSound.Playing = true
+        
+        _G.LightingProtectionEnabled = false
+        
         local Atmosphere = game:GetService("ReplicatedStorage").WinterAtmosphere.Atmosphere:Clone()
         Atmosphere.Parent = game.Lighting
         Atmosphere.Density = 0.5
@@ -657,17 +643,23 @@ VisualRain:OnChanged(function()
         local Sky = game:GetService("ReplicatedStorage").WinterAtmosphere.Sky:Clone()
         Sky.Parent = game.Lighting
         
+        _G.LightingProtectionEnabled = true
+        
         table.insert(RainVisuals, RainM)
         table.insert(RainVisuals, RainSound)
         table.insert(RainVisuals, Atmosphere)
         table.insert(RainVisuals, Sky)
 
     else
-    ArrayListManager.RemoveFunction('visual rain')
+        ArrayListManager.RemoveFunction('visual rain')
+        
+        _G.LightingProtectionEnabled = false
+        
         spawn(function()
             for i,v in pairs(RainVisuals) do
                 v:Destroy()
             end
+            RainVisuals = {}
         end)
     end
 end)
@@ -706,7 +698,7 @@ FancyNicks:OnChanged(function()
                         local NickLabel = Instance.new('TextLabel', BillboardGui)
                         NickLabel.Font = Enum.Font.Roboto
                         NickLabel.FontFace.Weight = Enum.FontWeight.Bold
-                        NickLabel.Text = player.Name
+                        NickLabel.Text = player.DisplayName
                         NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
                         NickLabel.TextXAlignment = Enum.TextXAlignment.Left
                         NickLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -747,7 +739,7 @@ FancyNicks:OnChanged(function()
                 local NickLabel = Instance.new('TextLabel', BillboardGui)
                 NickLabel.Font = Enum.Font.Roboto
                 NickLabel.FontFace.Weight = Enum.FontWeight.Bold
-                NickLabel.Text = player.Name
+                NickLabel.Text = player.DisplayName
                 NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
                 NickLabel.TextXAlignment = Enum.TextXAlignment.Left
                 NickLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -788,7 +780,7 @@ FancyNicks:OnChanged(function()
                 local NickLabel = Instance.new('TextLabel', BillboardGui)
                 NickLabel.Font = Enum.Font.Roboto
                 NickLabel.FontFace.Weight = Enum.FontWeight.Bold
-                NickLabel.Text = player.Name
+                NickLabel.Text = player.DisplayName
                 NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
                 NickLabel.TextXAlignment = Enum.TextXAlignment.Left
                 NickLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -856,7 +848,7 @@ SeeMineFancyNickname:OnChanged(function()
                 local NickLabel = Instance.new('TextLabel', BillboardGui)
                 NickLabel.Font = Enum.Font.Roboto
                 NickLabel.FontFace.Weight = Enum.FontWeight.Bold
-                NickLabel.Text = LocalPlayer.Name
+                NickLabel.Text = LocalPlayer.DisplayName
                 NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
                 NickLabel.TextXAlignment = Enum.TextXAlignment.Left
                 NickLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -913,7 +905,7 @@ LocalPlayer.CharacterAdded:Connect(function(character)
     local NickLabel = Instance.new('TextLabel', BillboardGui)
     NickLabel.Font = Enum.Font.Roboto
     NickLabel.FontFace.Weight = Enum.FontWeight.Bold
-    NickLabel.Text = LocalPlayer.Name
+    NickLabel.Text = LocalPlayer.DisplayName
     NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
     NickLabel.TextXAlignment = Enum.TextXAlignment.Left
     NickLabel.Size = UDim2.new(1, 0, 1, 0)
