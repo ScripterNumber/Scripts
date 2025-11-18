@@ -24,20 +24,27 @@ _G.RagdollTimerEnabled = false
 _G.SpiderBoostEnabled = false
 _G.AutoSaveEnabled = false
 
+local RainVisuals = {}
+_G.WasVisualRain = _G.WasVisualRain == true and _G.WasVisualRain or false
+
+_G.CustomNamesEnabled = false
+_G.SelfVisualName = false
+
 local RagdollTimer = Tabs.MainTab:AddToggle("RagdollTimer", {Title = "Таймер Рагдолла", Default = false})
 
 RagdollTimer:OnChanged(function()
     _G.RagdollTimerEnabled = Options.RagdollTimer.Value
     
     if _G.RagdollTimerEnabled == true then
-        ArrayListManager.AddFunction('RagdollTimer')
+        ArrayListManager.AddFunction('ragdoll timer')
     else
-        ArrayListManager.RemoveFunction('RagdollTimer')
+        ArrayListManager.RemoveFunction('ragdoll timer')
     end
 end)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
 
 local activeTimers = {}
 
@@ -154,7 +161,7 @@ SpiderBoost:OnChanged(function()
     _G.SpiderBoostEnabled = Options.SpiderBoost.Value
     
     if _G.SpiderBoostEnabled == true then
-        ArrayListManager.AddFunction('SpiderBoost')
+        ArrayListManager.AddFunction('run boost')
         
         local LocalPlayer = game.Players.LocalPlayer
         local Character = LocalPlayer.Character
@@ -223,7 +230,7 @@ SpiderBoost:OnChanged(function()
             end)
         end)
     else
-        ArrayListManager.RemoveFunction('SpiderBoost')
+        ArrayListManager.RemoveFunction('run boost')
         
         if _G.ToolBoost ~= nil then
             _G.ToolBoost:Disconnect()
@@ -361,6 +368,49 @@ local function setupAutoSave()
     end)
 end
 
+local AutoLoot = Tabs.MainTab:AddToggle("AutoLoot", {Title = "Авто Лут (Сломан)", Default = false})
+
+AutoLoot:OnChanged(function()
+    AutoLootToggle = Options.AutoLoot.Value
+    
+    if AutoLootToggle == true then
+        
+        ArrayListManager.AddFunction('auto loot')
+        
+        while AutoLootToggle do
+            
+            for i,v in pairs(workspace:GetChildren()) do
+                if v:IsA('Folder') and v.Name == 'Folder' and v:FindFirstChild('Handle') and v.Handle:FindFirstChild('ItemGlow') then
+                    firetouchinterest(v.Handle, game.Players.LocalPlayer.Character.Torso, 1)
+                    firetouchinterest(v.Handle, game.Players.LocalPlayer.Character.Torso, 0)
+                    spawn(function()
+                        for i,v in pairs(v:GetDescendants()) do
+                            if v:IsA('Part') or v:IsA('MeshPart') or v:IsA('UnionOperation') or v:IsA('WedgePart') then
+                                v.CanCollide = false
+                                v.CanQuery = false
+                            end
+                            if v.Name == 'ItemGlow' then
+                                v.Enabled = false
+                            end
+                        end
+                    end)
+                    v.Handle:PivotTo(game.Players.LocalPlayer.Character:GetPivot())
+                end
+            end
+
+            task.wait()
+
+        end
+
+    else
+
+        ArrayListManager.RemoveFunction('auto loot')
+        
+        AutoLootToggle = false
+
+    end
+end)
+
 Tabs.OtherTab:AddButton({
     Title = "Табличка в торсо",
     Description = "",
@@ -452,19 +502,21 @@ SignViewer:OnChanged(function()
     SignViewerToggle = Options.SignViewer.Value
     
     if SignViewerToggle == true then
+        ArrayListManager.AddFunction('sign viewer')
         _G.SignViewer(true)
     else
+    ArrayListManager.RemoveFunction('sign viewer')
         _G.SignViewer(false)
     end
 end)
 
-local InvisTyping = Tabs.OtherTab:AddToggle("InvisTyping", {Title = "Невидмое печатание", Default = false})
+local InvisTyping = Tabs.OtherTab:AddToggle("InvisTyping", {Title = "Невидимое печатание", Default = false})
 
 InvisTyping:OnChanged(function()
     InvisTypingToggle = Options.InvisTyping.Value
     
     if InvisTypingToggle == true then
-        
+        ArrayListManager.AddFunction('invis typing')
         _G.BlockTheCAnim = true
 
         task.spawn(function()
@@ -488,9 +540,389 @@ InvisTyping:OnChanged(function()
         end)
 
     else
+     ArrayListManager.RemoveFunction('invis typing')
         _G.BlockTheCAnim = false
     end
 end)
+
+Tabs.OtherTab:AddParagraph({
+    Title = "Для красоты",
+    Content = ""
+})
+
+local VisualRain = Tabs.OtherTab:AddToggle("VisualRain", {Title = "Визуальный дождь", Default = false})
+
+VisualRain:OnChanged(function()
+    VisualRainToggle = Options.VisualRain.Value
+    
+    if VisualRainToggle == true then
+        ArrayListManager.AddFunction('visual rain')
+        
+        if _G.WasVisualRain == false then
+
+            _G.WasVisualRain = true
+
+            local old_newindex
+            old_newindex = hookmetamethod(game, "__newindex", newcclosure(function(self, property, value)
+                if self == game.Lighting or self:IsDescendantOf(game.Lighting) then
+                    local caller = getcallingscript and getcallingscript()
+                    if caller == game.Players.LocalPlayer.PlayerGui.UI.LocalScript then
+                        return
+                    end
+                end
+                return old_newindex(self, property, value)
+            end))
+
+            local old_namecall
+            old_namecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+                local method = getnamecallmethod()
+                local caller = getcallingscript and getcallingscript()
+                
+                if caller == game.Players.LocalPlayer.PlayerGui.UI.LocalScript then
+                    if method == "Destroy" or method == "Remove" then
+                        if self:IsDescendantOf(game.Lighting) then
+                            return
+                        end
+                    end
+                end
+                
+                return old_namecall(self, ...)
+            end))
+
+        end
+
+        local RainM = game:GetService("ReplicatedStorage").RainM:Clone()
+        RainM.Parent = workspace
+        spawn(function()
+            for i = 1,#RainM:GetChildren()-1 do
+            end
+            local LastPart = RainM:GetChildren()[1]
+            LastPart.ParticleEmitter.Enabled = true
+            LastPart.ParticleEmitter.Rate = 9999999999
+            LastPart.Size = Vector3.new(750, 0.25, 750)
+            for i = 1, 500 do
+                LastPart:Clone().Parent = RainM
+            end
+        end)
+        local RainSound = game:GetService("ReplicatedStorage").Sounds["Heavy Rain 2 (SFX)"]:Clone()
+        RainSound.Parent = workspace
+        RainSound.Playing = true
+        local Atmosphere = game:GetService("ReplicatedStorage").WinterAtmosphere.Atmosphere:Clone()
+        Atmosphere.Parent = game.Lighting
+        Atmosphere.Density = 0.5
+        Atmosphere.Offset = 1
+        Atmosphere.Color = Color3.fromRGB(149, 184, 153)
+        Atmosphere.Haze = 10
+        game.Lighting.Ambient = Color3.fromRGB(138, 138, 138)
+        game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        game.Lighting.Brightness = 2
+        game.Lighting.EnvironmentDiffuseScale = 0.02
+        local Sky = game:GetService("ReplicatedStorage").WinterAtmosphere.Sky:Clone()
+        Sky.Parent = game.Lighting
+        
+        table.insert(RainVisuals, RainM)
+        table.insert(RainVisuals, RainSound)
+        table.insert(RainVisuals, Atmosphere)
+        table.insert(RainVisuals, Sky)
+
+    else
+    ArrayListManager.RemoveFunction('visual rain')
+        spawn(function()
+            for i,v in pairs(RainVisuals) do
+                v:Destroy()
+            end
+        end)
+    end
+end)
+
+local FancyNicks = Tabs.OtherTab:AddToggle("FancyNicks", {Title = "Фанси никнеймы", Default = false})
+
+FancyNicks:OnChanged(function()
+    FancyNicksToggle = Options.FancyNicks.Value
+    
+    if FancyNicksToggle == true then
+        ArrayListManager.AddFunction('fancy nicknames')
+        
+        _G.CustomNamesEnabled = true
+
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                if player == LocalPlayer and not _G.SelfVisualName then 
+                    
+                else
+                    local head = player.Character:FindFirstChild("Head")
+                    if head then
+                        if head:FindFirstChild("Nickname") then
+                            head:FindFirstChild("Nickname"):Destroy()
+                        end
+                        
+                        local humanoid = player.Character:FindFirstChild("Humanoid")
+                        if humanoid then
+                            humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                        end
+                        
+                        local BillboardGui = Instance.new('BillboardGui', head)
+                        BillboardGui.Size = UDim2.new(5, 0, 1, 0)
+                        BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                        BillboardGui.Name = 'Nickname'
+                        
+                        local NickLabel = Instance.new('TextLabel', BillboardGui)
+                        NickLabel.Font = Enum.Font.Roboto
+                        NickLabel.FontFace.Weight = Enum.FontWeight.Bold
+                        NickLabel.Text = player.Name
+                        NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
+                        NickLabel.TextXAlignment = Enum.TextXAlignment.Left
+                        NickLabel.Size = UDim2.new(1, 0, 1, 0)
+                        NickLabel.BackgroundTransparency = 1
+                        NickLabel.TextScaled = true
+                        NickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        NickLabel.BorderSizePixel = 0
+                        
+                        local ProfilePic = Instance.new('ImageLabel', BillboardGui)
+                        ProfilePic.Size = UDim2.new(0.18, 0, 1, 0)
+                        ProfilePic.BorderSizePixel = 0
+                        ProfilePic.BackgroundTransparency = 1
+                        ProfilePic.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420"
+                    end
+                end
+            end
+            
+            player.CharacterAdded:Connect(function(character)
+                if not _G.CustomNamesEnabled then return end
+                if player == LocalPlayer and not _G.SelfVisualName then return end
+                
+                local head = character:WaitForChild("Head")
+                
+                if head:FindFirstChild("Nickname") then
+                    head:FindFirstChild("Nickname"):Destroy()
+                end
+                
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
+                
+                local BillboardGui = Instance.new('BillboardGui', head)
+                BillboardGui.Size = UDim2.new(5, 0, 1, 0)
+                BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                BillboardGui.Name = 'Nickname'
+                
+                local NickLabel = Instance.new('TextLabel', BillboardGui)
+                NickLabel.Font = Enum.Font.Roboto
+                NickLabel.FontFace.Weight = Enum.FontWeight.Bold
+                NickLabel.Text = player.Name
+                NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
+                NickLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NickLabel.Size = UDim2.new(1, 0, 1, 0)
+                NickLabel.BackgroundTransparency = 1
+                NickLabel.TextScaled = true
+                NickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                NickLabel.BorderSizePixel = 0
+                
+                local ProfilePic = Instance.new('ImageLabel', BillboardGui)
+                ProfilePic.Size = UDim2.new(0.18, 0, 1, 0)
+                ProfilePic.BorderSizePixel = 0
+                ProfilePic.BackgroundTransparency = 1
+                ProfilePic.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420"
+            end)
+        end
+
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                if not _G.CustomNamesEnabled then return end
+                if player == LocalPlayer and not _G.SelfVisualName then return end
+                
+                local head = character:WaitForChild("Head")
+                
+                if head:FindFirstChild("Nickname") then
+                    head:FindFirstChild("Nickname"):Destroy()
+                end
+                
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
+                
+                local BillboardGui = Instance.new('BillboardGui', head)
+                BillboardGui.Size = UDim2.new(5, 0, 1, 0)
+                BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                BillboardGui.Name = 'Nickname'
+                
+                local NickLabel = Instance.new('TextLabel', BillboardGui)
+                NickLabel.Font = Enum.Font.Roboto
+                NickLabel.FontFace.Weight = Enum.FontWeight.Bold
+                NickLabel.Text = player.Name
+                NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
+                NickLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NickLabel.Size = UDim2.new(1, 0, 1, 0)
+                NickLabel.BackgroundTransparency = 1
+                NickLabel.TextScaled = true
+                NickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                NickLabel.BorderSizePixel = 0
+                
+                local ProfilePic = Instance.new('ImageLabel', BillboardGui)
+                ProfilePic.Size = UDim2.new(0.18, 0, 1, 0)
+                ProfilePic.BorderSizePixel = 0
+                ProfilePic.BackgroundTransparency = 1
+                ProfilePic.Image = "rbxthumb://type=AvatarHeadShot&id=" .. player.UserId .. "&w=420&h=420"
+            end)
+        end)
+
+    else
+        ArrayListManager.RemoveFunction('fancy nicknames')
+
+        _G.CustomNamesEnabled = false
+
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character then
+                local head = player.Character:FindFirstChild("Head")
+                if head and head:FindFirstChild("Nickname") then
+                    head:FindFirstChild("Nickname"):Destroy()
+                end
+                
+                local humanoid = player.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+                end
+            end
+        end
+
+    end
+end)
+
+local SeeMineFancyNickname = Tabs.OtherTab:AddToggle("SeeMineFancyNickname", {Title = "Видить свой фанси ник", Default = false})
+
+SeeMineFancyNickname:OnChanged(function()
+    SeeMineFancyNicknameToggle = Options.SeeMineFancyNickname.Value
+
+    if SeeMineFancyNicknameToggle == true then
+        ArrayListManager.AddFunction('self fancynick')
+        _G.SelfVisualName = true
+        
+        if _G.CustomNamesEnabled and LocalPlayer.Character then
+            local head = LocalPlayer.Character:FindFirstChild("Head")
+            if head then
+                if head:FindFirstChild("Nickname") then
+                    head:FindFirstChild("Nickname"):Destroy()
+                end
+                
+                local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                end
+                
+                local BillboardGui = Instance.new('BillboardGui', head)
+                BillboardGui.Size = UDim2.new(5, 0, 1, 0)
+                BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+                BillboardGui.Name = 'Nickname'
+                
+                local NickLabel = Instance.new('TextLabel', BillboardGui)
+                NickLabel.Font = Enum.Font.Roboto
+                NickLabel.FontFace.Weight = Enum.FontWeight.Bold
+                NickLabel.Text = LocalPlayer.Name
+                NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
+                NickLabel.TextXAlignment = Enum.TextXAlignment.Left
+                NickLabel.Size = UDim2.new(1, 0, 1, 0)
+                NickLabel.BackgroundTransparency = 1
+                NickLabel.TextScaled = true
+                NickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                NickLabel.BorderSizePixel = 0
+                
+                local ProfilePic = Instance.new('ImageLabel', BillboardGui)
+                ProfilePic.Size = UDim2.new(0.18, 0, 1, 0)
+                ProfilePic.BorderSizePixel = 0
+                ProfilePic.BackgroundTransparency = 1
+                ProfilePic.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=420&h=420"
+            end
+        end
+    else
+        _G.SelfVisualName = false
+        ArrayListManager.RemoveFunction('self fancynick')
+        
+        if LocalPlayer.Character then
+            local head = LocalPlayer.Character:FindFirstChild("Head")
+            if head and head:FindFirstChild("Nickname") then
+                head:FindFirstChild("Nickname"):Destroy()
+            end
+            
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            end
+        end
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    if not _G.CustomNamesEnabled then return end
+    if not _G.SelfVisualName then return end
+    
+    local head = character:WaitForChild("Head")
+    
+    if head:FindFirstChild("Nickname") then
+        head:FindFirstChild("Nickname"):Destroy()
+    end
+    
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+    end
+    
+    local BillboardGui = Instance.new('BillboardGui', head)
+    BillboardGui.Size = UDim2.new(5, 0, 1, 0)
+    BillboardGui.StudsOffset = Vector3.new(0, 1.5, 0)
+    BillboardGui.Name = 'Nickname'
+    
+    local NickLabel = Instance.new('TextLabel', BillboardGui)
+    NickLabel.Font = Enum.Font.Roboto
+    NickLabel.FontFace.Weight = Enum.FontWeight.Bold
+    NickLabel.Text = LocalPlayer.Name
+    NickLabel.Position = UDim2.new(0.2, 0, 0, 0)
+    NickLabel.TextXAlignment = Enum.TextXAlignment.Left
+    NickLabel.Size = UDim2.new(1, 0, 1, 0)
+    NickLabel.BackgroundTransparency = 1
+    NickLabel.TextScaled = true
+    NickLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NickLabel.BorderSizePixel = 0
+    
+    local ProfilePic = Instance.new('ImageLabel', BillboardGui)
+    ProfilePic.Size = UDim2.new(0.18, 0, 1, 0)
+    ProfilePic.BorderSizePixel = 0
+    ProfilePic.BackgroundTransparency = 1
+    ProfilePic.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=420&h=420"
+end)
+
+Tabs.OtherTab:AddParagraph({
+    Title = "Остальное ещё",
+    Content = ""
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Быстрый доступ к парту Kil",
+    Description = "Типа тепает тя быстро к парту Kil (ты умрешь и.т.д.)",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            local Targeting = true
+            while Targeting do
+                if Targeting == true then
+                    LocalPlayer.Character.Humanoid.WalkToPoint = Vector3.new(0, 0, -25)
+                    if (LocalPlayer.Character.Torso.Position - workspace.startPart.Position).Magnitude <= 20 then
+                        Targeting = false
+                        wait(3)
+                        LocalPlayer.Character:PivotTo(CFrame.new(-3, -12269, -32))
+                        LocalPlayer.Character.Humanoid.Health = 0
+                        LocalPlayer.Character.Torso.Anchored = true
+                        replicatesignal(LocalPlayer.Kill)
+                        break
+                    end
+                else
+                    break
+                end
+                task.wait()
+            end
+        end
+    end
+})
 
 setupAutoSave()
 
