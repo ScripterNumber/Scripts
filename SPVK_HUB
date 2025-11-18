@@ -245,9 +245,9 @@ AutoSave:OnChanged(function()
     _G.AutoSaveEnabled = Options.AutoSave.Value
     
     if _G.AutoSaveEnabled == true then
-        ArrayListManager.AddFunction('AutoSave')
+        ArrayListManager.AddFunction('auto save')
     else
-        ArrayListManager.RemoveFunction('AutoSave')
+        ArrayListManager.RemoveFunction('auto save')
     end
 end)
 
