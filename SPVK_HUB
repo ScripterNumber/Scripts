@@ -16,6 +16,7 @@ local window = Fluent:CreateWindow({
 local Tabs = {
     MainTab = window:AddTab({ Title = "Main", Icon = "" }),
     OtherTab = window:AddTab({ Title = "Other", Icon = "" }),
+    RopeTab = window:AddTab({ Title = "Rope Things", Icon = "" }),
 }
 
 local Options = Fluent.Options
@@ -155,7 +156,7 @@ _G.SignViewer = function(isEnabled)
 
 end
 
-local SpiderBoost = Tabs.MainTab:AddToggle("SpiderBoost", {Title = "Ранбуст Человека паука", Default = false})
+local SpiderBoost = Tabs.MainTab:AddToggle("SpiderBoost", {Title = "Ранбуст с притягом (Расстягивает веру твою)", Default = false})
 
 SpiderBoost:OnChanged(function()
     _G.SpiderBoostEnabled = Options.SpiderBoost.Value
@@ -445,7 +446,7 @@ Tabs.OtherTab:AddButton({
 
 Tabs.OtherTab:AddButton({
     Title = "Заблокать трейд таблой",
-    Description = "",
+    Description = "Блокает дефолтный трейд возле крафта",
     Callback = function()
         local args = {
             "remove",
@@ -455,6 +456,42 @@ Tabs.OtherTab:AddButton({
          local args = {
             "create",
             CFrame.new(142.422531, 2050.04907, 127.88311, -0.668970048, 3.59919849e-09, -0.743288875, 4.84288378e-08, 1, -4.84287739e-08, 0.743291557, 6.83940371e-08, -0.668969691)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+
+    end
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Заблокать трейд 2 таблой",
+    Description = "Блокает трейд тот что через реку",
+    Callback = function()
+        local args = {
+            "remove",
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+    
+        local args = {
+            "create",
+            CFrame.new(-156.7, 2049.34912, 192.076538, 0.0228189826, 0, 0.999739647, 0, 1, 0, -0.999739647, 0, 0.0228189826)
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+
+    end
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Заблокать трейд 3 таблой",
+    Description = "Блокает золотой трейд",
+    Callback = function()
+        local args = {
+            "remove",
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
+    
+        local args = {
+            "create",
+            CFrame.new(-219.4229736328125, 2098.349609375, 213.3)
         }
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SignManager"):InvokeServer(unpack(args))
 
@@ -920,6 +957,102 @@ Tabs.OtherTab:AddButton({
                 end
                 task.wait()
             end
+        end
+    end
+})
+
+Tabs.RopeTab:AddButton({
+    Title = "Поджечь верёвкой (С нетворкой)",
+    Description = "Поджигает того кто у тя на вере если у тя есть нетворк овнер",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            
+            if LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:IsA('Model') and LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:FindFirstChildOfClass('Humanoid') then
+
+            local Target = LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent or LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent.Parent
+            
+                firetouchinterest(Target.Torso, workspace.FireParts.FireTouch, 1)
+                firetouchinterest(Target.Torso, workspace.FireParts.FireTouch, 0)
+
+            end
+
+        end
+    end
+})
+
+Tabs.RopeTab:AddButton({
+    Title = "Взорвать верёвкой (С нетворкой)",
+    Description = "Взрывает того кто у тя на вере если у тя есть нетворк овнер",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            
+            if LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:IsA('Model') and LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:FindFirstChildOfClass('Humanoid') then
+
+            local Target = LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent or LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent.Parent
+            
+                firetouchinterest(Target.Torso, workspace.Kil, 1)
+                firetouchinterest(Target.Torso, workspace.Kil, 0)
+
+            end
+
+        end
+    end
+})
+
+Tabs.RopeTab:AddButton({
+    Title = "Зафризить верой (С нетворкой)",
+    Description = "Фризит того кто у тя на вере если у тя есть нетворк овнер",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            
+            if LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:IsA('Model') and LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:FindFirstChildOfClass('Humanoid') then
+
+            local Target = LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent or LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent.Parent
+            
+                Target.Torso.Anchored = true
+
+                local FreezeCon 
+                FreezeCon = LocalPlayer.Character.ChildRemoved:Connect(function(child)
+                    Target.Torso.Anchored = false
+                    FreezeCon:Disconnect()
+                    FreezeCon = nil
+                end)
+
+            end
+
+        end
+    end
+})
+
+Tabs.RopeTab:AddButton({
+    Title = "Рагдоллнуть верёвкой (С нетворкой)",
+    Description = "Рагдоллает того кто у тя на вере если у тя есть нетворк овнер",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            
+            if LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:IsA('Model') and LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent:FindFirstChildOfClass('Humanoid') then
+
+            local Target = LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent or LocalPlayer.Character.RopeConstraint.Attachment1.Parent.Parent.Parent
+            
+                firetouchinterest(Target.Torso, workspace.RagdollParts.rea, 1)
+                firetouchinterest(Target.Torso, workspace.RagdollParts.rea, 0)
+
+            end
+
+        end
+    end
+})
+
+Tabs.RopeTab:AddButton({
+    Title = "Удлинить свою веревку",
+    Description = "Визуально удлиняет до бесконечности твою веру когда ты чёто держишь (Если ты держишь кого-то с нетворкой мб ему тоже видно)",
+    Callback = function()
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            
+            if LocalPlayer.Character:FindFirstChild('RopeConstraint') then
+                LocalPlayer.Character:FindFirstChild('RopeConstraint').Length = math.huge
+            end
+
         end
     end
 })
