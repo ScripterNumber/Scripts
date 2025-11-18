@@ -4,8 +4,8 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 local ArrayListManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/ScripterNumber/Scripts/refs/heads/main/ArrayList"))()
 
 local window = Fluent:CreateWindow({
-    Title = "Array List Test",
-    SubTitle = "",
+    Title = "SPVK HUB",
+    SubTitle = "By Fem6oy4ik",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = true,
@@ -90,6 +90,63 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
+
+_G.SignViewer = function(isEnabled)
+
+    if isEnabled then
+
+        local function ApplyText(sign, owner)
+            local SignPart = sign:WaitForChild('Part')
+            local BillboardGui = Instance.new('BillboardGui', SignPart)
+            BillboardGui.ResetOnSpawn = false
+            BillboardGui.Size = UDim2.new(10, 0, 1, 0)
+            BillboardGui.StudsOffset = Vector3.new(0, 3, 0)
+            BillboardGui.AlwaysOnTop = false
+            BillboardGui.LightInfluence = 0
+            local TextLabel = Instance.new('TextLabel', BillboardGui)
+            TextLabel.Size = UDim2.new(1, 0, 1, 0)
+            TextLabel.TextScaled = true
+            TextLabel.Text = owner
+            TextLabel.BackgroundTransparency = 1
+            TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
+
+        _G.SignViewerSignAdded = workspace.ChildAdded:Connect(function(Child)
+            if Child.Name:find('Sign') then
+                local SignOwner = tostring(Child.Name:gsub("'s Sign", ''))
+                if game.Players:FindFirstChild(SignOwner) then
+                    ApplyText(Child, SignOwner)
+                end
+            end
+        end)
+
+        for i,Child in pairs(workspace:GetChildren()) do
+            if Child.Name:find('Sign') then
+                local SignOwner = tostring(Child.Name:gsub("'s Sign", ''))
+                if game.Players:FindFirstChild(SignOwner) then
+                    ApplyText(Child, SignOwner)
+                end
+            end
+        end
+
+    else
+
+        if _G.SignViewerSignAdded ~= nil then
+            _G.SignViewerSignAdded:Disconnect()
+        end
+
+        for i,Child in pairs(workspace:GetChildren()) do
+            if Child.Name:find('Sign') then
+                local SignOwner = tostring(Child.Name:gsub("'s Sign", ''))
+                if game.Players:FindFirstChild(SignOwner) and Child.Part:FindFirstChildOfClass('BillboardGui') then
+                    Child.Part:FindFirstChildOfClass('BillboardGui'):Destroy()
+                end
+            end
+        end
+
+    end
+
+end
 
 local SpiderBoost = Tabs.MainTab:AddToggle("SpiderBoost", {Title = "Ранбуст Человека паука", Default = false})
 
@@ -354,11 +411,90 @@ Tabs.OtherTab:AddButton({
     end
 })
 
+Tabs.OtherTab:AddParagraph({
+    Title = "Остальное",
+    Content = ""
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Сесть быстро на трейд",
+    Description = "",
+    Callback = function()
+        
+        local Positions = {
+            Vector3.new(142.36827087402344, 2050.30029296875, 127.86827087402344),
+            Vector3.new(158.63172912597656, 2050.30029296875, 144.13172912597656)
+        }
+
+        local function isTrue(Seat)
+            local list = {}
+            for i,v in pairs(Positions) do
+                if Seat.Position == v then
+                    table.insert(list, Seat)
+                end
+            end
+            return list
+        end
+
+        for i,v in pairs(workspace.TradeSeats:GetDescendants()) do
+            if v:IsA('Seat') and isTrue(v)[1] ~= nil then
+                replicatesignal(v.RemoteCreateSeatWeld, game.Players.LocalPlayer.Character.Humanoid)
+                else
+            end
+        end
+
+    end
+})
+
+local SignViewer = Tabs.OtherTab:AddToggle("SignViewer", {Title = "Посмотреть авторов таблички", Default = false})
+
+SignViewer:OnChanged(function()
+    SignViewerToggle = Options.SignViewer.Value
+    
+    if SignViewerToggle == true then
+        _G.SignViewer(true)
+    else
+        _G.SignViewer(false)
+    end
+end)
+
+local InvisTyping = Tabs.OtherTab:AddToggle("InvisTyping", {Title = "Невидмое печатание", Default = false})
+
+InvisTyping:OnChanged(function()
+    InvisTypingToggle = Options.InvisTyping.Value
+    
+    if InvisTypingToggle == true then
+        
+        _G.BlockTheCAnim = true
+
+        task.spawn(function()
+            while _G.BlockTheCAnim do
+                task.wait()
+                
+                if not _G.BlockTheCAnim then 
+                    continue 
+                end
+                
+                local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+                if not hum then continue end
+                
+                for _, track in hum:GetPlayingAnimationTracks() do
+                    if track.Animation.AnimationId == "rbxassetid://83444920608684" then
+                        track:Stop(0)
+                        track:AdjustSpeed(0)
+                    end
+                end
+            end
+        end)
+
+    else
+        _G.BlockTheCAnim = false
+    end
+end)
+
 setupAutoSave()
 
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     setupAutoSave()
 end)
-
-
