@@ -618,9 +618,9 @@ VisualRain:OnChanged(function()
             end
             local LastPart = RainM:GetChildren()[1]
             LastPart.ParticleEmitter.Enabled = true
-            LastPart.ParticleEmitter.Rate = 9999999999
+            LastPart.ParticleEmitter.Rate = 99999
             LastPart.Size = Vector3.new(750, 0.25, 750)
-            for i = 1, 500 do
+            for i = 1, 150 do
                 LastPart:Clone().Parent = RainM
             end
         end)
