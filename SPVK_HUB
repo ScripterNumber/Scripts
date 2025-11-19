@@ -412,6 +412,47 @@ AutoLoot:OnChanged(function()
     end
 end)
 
+local GlobalJumpPowerSelected = 50
+
+local JumpPowerInput = Tabs.MainTab:AddInput("JumpPowerInput", {
+    Title = "JumpPower",
+    Default = '50',
+    Placeholder = "Силу прыжка введи тут",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 then
+            GlobalJumpPowerSelected = Value
+        end
+    end
+})
+
+local LoopJPToggle = Tabs.MainTab:AddToggle("LoopJPToggle", {Title = "Включить силу прыжка", Default = false})
+
+LoopJPToggle:OnChanged(function()
+    LoopJPToggleVal = Options.LoopJPToggle.Value
+    
+    if LoopJPToggleVal == true then
+        ArrayListManager.AddFunction('loop jumppower')
+        while LoopJPToggleVal do
+            if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 and LocalPlayer.Character:GetAttribute('rag') == false then
+                LocalPlayer.Character.Humanoid.UseJumpPower = true
+                LocalPlayer.Character.Humanoid.JumpPower = GlobalJumpPowerSelected
+            end
+            task.wait()
+        end
+    else
+    ArrayListManager.RemoveFunction('loop jumppower') 
+    if LocalPlayer.Character ~= nil and LocalPlayer.Character.Humanoid.Health > 0 and LocalPlayer.Character:GetAttribute('rag') == false then
+
+    LocalPlayer.Character.Humanoid.UseJumpPower = true
+    LocalPlayer.Character.Humanoid.JumpPower = 50
+
+    end
+
+    end
+end)
+
 Tabs.OtherTab:AddButton({
     Title = "Табличка в торсо",
     Description = "",
@@ -949,6 +990,16 @@ Tabs.OtherTab:AddButton({
                 end
                 task.wait()
             end
+        end
+    end
+})
+
+Tabs.OtherTab:AddButton({
+    Title = "Открыть крафт (визуал + ворк)",
+    Description = "Открывает менюшку крафта",
+    Callback = function()
+        if LocalPlayer.Character ~= nil then
+            game:GetService("Players").LocalPlayer.PlayerGui.UI.CraftFrame.Visible = true
         end
     end
 })
